@@ -19,3 +19,24 @@ FIRST: set up your ssh keys with [GitHub](https://help.github.com/articles/gener
     - Tester: [MochaJS](https://mochajs.org/)
 - [MySQL](http://mysql.com)
 - [RESTful API (Http call: GET POST PUT DELETE...)](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
+  - Testing Tool: 
+    - Postman (on mac)
+    - REST Client (in VSCode)
+    - HttpRequester (in Sublime)
+    - RESTAngular (in code)
+
+### Coding Guideline
+- [TypeScript](https://github.com/Microsoft/TypeScript/wiki/Coding-guidelines)
+- [JSON](https://google.github.io/styleguide/jsoncstyleguide.xml)
+- [Unit Test](http://geosoft.no/development/unittesting.html)
+
+### RESTful API Guideline
+```
+/Collections
+  - GET
+  - POST
+    /{Parameters}
+      - GET
+      - PUT
+      - DELETE
+```
