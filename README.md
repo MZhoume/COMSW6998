@@ -40,3 +40,11 @@ FIRST: set up your ssh keys with [GitHub](https://help.github.com/articles/gener
       - PUT
       - DELETE
 ```
+
+### For every .TS file
+Please include this at the beginning:
+```typescript
+/// <reference path="../typings/index.d.ts" />
+import * as lambda from 'aws-lambda'
+import * as sdk from 'aws-sdk'
+```
