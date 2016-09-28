@@ -48,3 +48,46 @@ Please include this at the beginning:
 import * as lambda from 'aws-lambda'
 import * as sdk from 'aws-sdk'
 ```
+
+### Request JSON example
+1. /address
+- POST
+```
+{
+  "UUID": xxx,
+  "city": xxx,
+  "num": xxx,
+  "street": xxx,
+  "zipcode": xxx
+}
+```
+
+1. /address/{id}
+- PUT
+```
+{
+  "expression": xxx,
+  "values": xxx
+}
+```
+
+1. /customers
+- POST
+```
+{
+  "email": xxx,
+  "firstname": xxx,
+  "lastname": xxx,
+  "phonenumber": xxx,
+  "address_ref": xxx
+}
+```
+
+1. /customers/{email}
+- PUT
+```
+{
+  "expression": xxx,
+  "values": xxx
+}
+```
