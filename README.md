@@ -70,6 +70,8 @@ import * as sdk from 'aws-sdk'
   "values": xxx
 }
 ```
+Expression example: "set firstname=:fn, lastname=:ln",
+Values Example: {":fn": "fffnnn", ":ln": "lllnnn"}.
 
 1. /customers
 - POST
