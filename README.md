@@ -54,7 +54,7 @@ import * as sdk from 'aws-sdk'
 - POST
 ```
 {
-  "UUID": xxx,
+  "uuid": xxx,
   "city": xxx,
   "num": xxx,
   "street": xxx,

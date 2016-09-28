@@ -5,10 +5,10 @@ var DBManager = (function () {
     function DBManager(_db) {
         this._db = _db;
     }
-    DBManager.prototype.create = function (tableName, payload, callback) {
+    DBManager.prototype.create = function (tableName, item, callback) {
         var params = {
             TableName: tableName,
-            Item: payload.item
+            Item: item
         };
         console.log(params);
         this._db.put(params, callback);
@@ -52,11 +52,11 @@ var DBManager = (function () {
 }());
 var Validator = {
     'email': function (email) {
-        var regex = new RegExp('/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i');
+        var regex = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
         return regex.test(email);
     },
     'zipcode': function (zipcode) {
-        var regex = new RegExp('/\d{5}/i');
+        var regex = /^\d{5}$/;
         return regex.test(zipcode);
     }
 };
@@ -71,17 +71,43 @@ function handler(event, context, callback) {
     var dynamo = new sdk.DynamoDB.DocumentClient();
     var db = new DBManager(dynamo);
     var tableName = event.tableName;
-    // if (tableName === 'customers') {
-    //     if (event.operation === 'create') {
-    //         if (!(validate(event.payload.item.email, 'email', callback)   
-    //             && validate(event.payload.item.zipcode, 'zipcode', callback))) {
-    //                 return;
-    //         }
-    //     }
-    // }
+    if (tableName === 'customers') {
+        if (event.operation === 'create') {
+            if (!validate(event.payload.item.email, 'email', callback)) {
+                return;
+            }
+        }
+    }
+    else if (tableName === 'addresses') {
+        if (event.operation === 'create') {
+            if (!validate(event.payload.item.zipcode, 'zipcode', callback)) {
+                return;
+            }
+        }
+    }
     switch (event.operation) {
         case 'create':
-            db.create(tableName, event.payload, callback);
+            var item = void 0;
+            var payload = event.payload.item;
+            if (tableName === 'customers') {
+                item = {
+                    email: payload.email,
+                    firstname: payload.firstname || "",
+                    lastname: payload.lastname || "",
+                    phonenumber: payload.phonenumber || "",
+                    address_ref: payload.address_ref || ""
+                };
+            }
+            else if (tableName === 'addresses') {
+                item = {
+                    uuid: payload.uuid,
+                    city: payload.city || "",
+                    street: payload.street || "",
+                    num: payload.num || "",
+                    zipcode: payload.zipcode || ""
+                };
+            }
+            db.create(tableName, item, callback);
             break;
         case 'read':
             db.read(tableName, event.payload, callback);
