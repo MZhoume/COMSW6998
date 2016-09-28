@@ -15,53 +15,53 @@ class DBManager {
         private _db: IDB
     ) { }
 
-    create(event, callback: lambda.Callback) {
+    create(tableName: string, payload, callback: lambda.Callback) {
         let params = {
-            TableName: event.tableName,
-            Item: event.item
+            TableName: tableName,
+            Item: payload.item
         };
 
         console.log(params);
         this._db.put(params, callback);
     }
 
-    get(event, callback: lambda.Callback) {
+    read(tableName: string, payload, callback: lambda.Callback) {
         let params = {
-            TableName: event.tableName,
-            Key: event.key
+            TableName: tableName,
+            Key: payload.key
         };
 
         console.log(params);
         this._db.get(params, callback);
     }
 
-    update(event, callback: lambda.Callback) {
+    update(tableName: string, payload, callback: lambda.Callback) {
         let params = {
-            TableName: event.tableName,
-            Key: event.key,
-            UpdateExpression: event.expression,
-            ExpressionAttributeValues: event.values
+            TableName: tableName,
+            Key: payload.key,
+            UpdateExpression: payload.expression,
+            ExpressionAttributeValues: payload.values
         };
 
         console.log(params);
         this._db.update(<any>params, callback);
     }
 
-    delete(event, callback: lambda.Callback) {
+    delete(tableName: string, payload, callback: lambda.Callback) {
         let params = {
-            TableName: event.tableName,
-            Key: event.key
+            TableName: tableName,
+            Key: payload.key
         };
 
         console.log(params);
         this._db.delete(params, callback);
     }
 
-    find(event, callback: lambda.Callback) {
+    find(tableName: string, payload, callback: lambda.Callback) {
         let params = {
-            TableName: event.tableName,
-            FilterExpression: event.expression,
-            ExpressionAttributeValues: event.values
+            TableName: tableName,
+            FilterExpression: payload.expression,
+            ExpressionAttributeValues: payload.values
         };
 
         console.log(params);
@@ -81,54 +81,60 @@ var Validator = {
     }
 };
 
-function generalCallback(err, data) {
-    console.log('err: ', err);
-    console.log('data: ', data);
-}
-
 function validate(data, validatorName, callback: lambda.Callback): boolean {
     if (data && Validator[validatorName](data)) {
         return true;
     }
-    callback(new Error('Field: ' + data + ' is not validated with ' + validatorName));
+    callback(new Error('Value: ' + data + ' is not validated as ' + validatorName));
     return false;
 }
 
 export function handler(event, context: lambda.Context, callback: lambda.Callback) {
-    console.log('event: ', JSON.stringify(event));
-    console.log('context: ', JSON.stringify(context));
-
     let dynamo = new sdk.DynamoDB.DocumentClient();
     let db = new DBManager(dynamo);
     let tableName = event.tableName;
 
-    if (tableName === 'customers') {
-        if (event.operation === 'create') {
-            validate(event.item.email, 'email', callback);
-            validate(event.item.zipcode, 'zipcode', callback);
-        }
-    }
+    // if (tableName === 'customers') {
+    //     if (event.operation === 'create') {
+    //         if (!(validate(event.payload.item.email, 'email', callback)   
+    //             && validate(event.payload.item.zipcode, 'zipcode', callback))) {
+    //                 return;
+    //         }
+    //     }
+    // }
 
     switch (event.operation) {
         case 'create':
-            db.create(event, generalCallback);
+            db.create(tableName, event.payload, callback);
             break;
 
         case 'read':
-            db.get(event, generalCallback);
+            db.read(tableName, event.payload, callback);
             break;
 
         case 'update':
-            db.update(event, generalCallback);
+            db.update(tableName, event.payload, callback);
             break;
 
         case 'delete':
-            db.delete(event, generalCallback);
+            db.delete(tableName, event.payload, callback);
             break;
 
         case 'find':
-            db.find(event, generalCallback);
+            db.find(tableName, event.payload, callback);
             break;
+        
+        case 'getaddr':
+            db.read('customers', event.payload, (err, res) => {
+                if (res) {
+                    let id = res.Item.address;
+                    db.read('addresses', {
+                        "key": {
+                            "UUID": id
+                        }
+                    }, callback);
+                }
+            });
+        break;
     }
 }
-
