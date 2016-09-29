@@ -1,6 +1,8 @@
 "use strict";
 /// <reference path="../typings/index.d.ts" />
 var sdk = require('aws-sdk');
+var customerKeys = ['email', 'firstname', 'lastname', 'phonenumber', 'address_ref'];
+var addressKeys = ['uuid', 'city', 'street', 'num', 'zipcode'];
 var DBManager = (function () {
     function DBManager(_db) {
         this._db = _db;
@@ -20,25 +22,40 @@ var DBManager = (function () {
         this._db.get(params, callback);
     };
     DBManager.prototype.update = function (tableName, payload, callback) {
+        var _this = this;
         var qparams = {
             TableName: tableName,
-            key: payload.key
+            Key: payload.key
         };
-        var res;
-        this._db.get(qparams, function (err, r) {
-            res = r;
+        this._db.get(qparams, function (err, res) {
+            if (!res) {
+                callback(new Error("Email: " + payload.key.email + " does not exists."));
+                return;
+            }
+            var keys;
+            if (tableName === 'customers') {
+                keys = customerKeys;
+            }
+            else if (tableName === 'addresses') {
+                keys = addressKeys;
+            }
+            var r = res.Item;
+            var attributes = {};
+            keys.forEach(function (e) {
+                if (payload.values[e] && r[e] !== payload.values[e]) {
+                    attributes[e] = {
+                        Action: "PUT",
+                        Value: payload.values[e]
+                    };
+                }
+            });
+            var params = {
+                TableName: tableName,
+                Key: payload.key,
+                AttributeUpdates: attributes
+            };
+            _this._db.update(params, callback);
         });
-        if (!res) {
-            callback(new Error("Email: " + payload.key.email + " does not exists."));
-            return;
-        }
-        var params = {
-            TableName: tableName,
-            Key: payload.key,
-            UpdateExpression: payload.expression,
-            ExpressionAttributeValues: payload.values
-        };
-        this._db.update(params, callback);
     };
     DBManager.prototype.delete = function (tableName, payload, callback) {
         var params = {
@@ -94,27 +111,19 @@ function handler(event, context, callback) {
     }
     switch (event.operation) {
         case 'create':
-            var item = void 0;
-            var payload = event.payload.item;
+            var item_1 = {};
+            var keys = void 0;
+            var payload_1 = event.payload.item;
             if (tableName === 'customers') {
-                item = {
-                    email: payload.email,
-                    firstname: payload.firstname,
-                    lastname: payload.lastname,
-                    phonenumber: payload.phonenumber,
-                    address_ref: payload.address_ref
-                };
+                keys = customerKeys;
             }
             else if (tableName === 'addresses') {
-                item = {
-                    uuid: payload.uuid,
-                    city: payload.city,
-                    street: payload.street,
-                    num: payload.num,
-                    zipcode: payload.zipcode
-                };
+                keys = addressKeys;
             }
-            db.create(tableName, item, callback);
+            keys.forEach(function (e) {
+                item_1[e] = payload_1[e];
+            });
+            db.create(tableName, item_1, callback);
             break;
         case 'read':
             db.read(tableName, event.payload, callback);

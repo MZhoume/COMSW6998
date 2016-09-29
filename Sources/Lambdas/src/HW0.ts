@@ -10,21 +10,8 @@ interface IDB {
     scan(params, callback);
 }
 
-interface ICustomer {
-    email: string;
-    firstname: string;
-    lastname: string;
-    phonenumber: string;
-    address_ref: string;
-}
-
-interface IAddress {
-    uuid: string;
-    city: string;
-    street: string;
-    num: string;
-    zipcode: string;
-}
+var customerKeys = ['email', 'firstname', 'lastname', 'phonenumber', 'address_ref'];
+var addressKeys = ['uuid', 'city', 'street', 'num', 'zipcode'];
 
 class DBManager {
     constructor(
@@ -52,28 +39,42 @@ class DBManager {
     update(tableName: string, payload, callback: lambda.Callback) {
         let qparams = {
             TableName: tableName,
-            key: payload.key
+            Key: payload.key
         };
 
-        let res;
+        this._db.get(qparams, (err, res) => {
+            if (!res) {
+                callback(new Error("Email: " + payload.key.email + " does not exists."));
+                return;
+            }
 
-        this._db.get(qparams, (err, r) => {
-            res = r;
+            let keys;
+            if (tableName === 'customers') {
+                keys = customerKeys;
+            } else if (tableName === 'addresses') {
+                keys = addressKeys;
+            }
+
+            let r = res.Item;
+            let attributes = {};
+            keys.forEach(e => {
+                if (payload.values[e] && r[e] !== payload.values[e]) {
+                    attributes[e] = {
+                        Action: "PUT",
+                        Value: payload.values[e]
+                    };
+                }
+            });
+
+            let params = {
+                TableName: tableName,
+                Key: payload.key,
+                AttributeUpdates: attributes
+            };
+
+            this._db.update(params, callback);
         });
 
-        if (!res) {
-            callback(new Error("Email: " + payload.key.email + " does not exists."));
-            return;
-        }
-
-        let params = {
-            TableName: tableName,
-            Key: payload.key,
-            UpdateExpression: payload.expression,
-            ExpressionAttributeValues: payload.values
-        };
-
-        this._db.update(<any>params, callback);
     }
 
     delete(tableName: string, payload, callback: lambda.Callback) {
@@ -137,25 +138,18 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
 
     switch (event.operation) {
         case 'create':
-            let item;
+            let item = {};
+            let keys;
             let payload = event.payload.item;
             if (tableName === 'customers') {
-                item = <ICustomer>{
-                    email: payload.email,
-                    firstname: payload.firstname,
-                    lastname: payload.lastname,
-                    phonenumber: payload.phonenumber,
-                    address_ref: payload.address_ref
-                };
+                keys = customerKeys;
             } else if (tableName === 'addresses') {
-                item = <IAddress>{
-                    uuid: payload.uuid,
-                    city: payload.city,
-                    street: payload.street,
-                    num: payload.num,
-                    zipcode: payload.zipcode
-                };
+                keys = addressKeys;
             }
+            keys.forEach(e => {
+                item[e] = payload[e];
+            });
+
             db.create(tableName, item, callback);
             break;
 
