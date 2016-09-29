@@ -178,7 +178,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
         case 'getaddr':
             db.read('customers', event.payload, (err, res) => {
                 if (res) {
-                    let id = res.Item.address;
+                    let id = res.Item.address_ref;
                     db.read('addresses', {
                         "key": {
                             "uuid": id

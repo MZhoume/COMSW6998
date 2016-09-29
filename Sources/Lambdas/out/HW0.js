@@ -131,7 +131,7 @@ function handler(event, context, callback) {
         case 'getaddr':
             db.read('customers', event.payload, function (err, res) {
                 if (res) {
-                    var id = res.Item.address;
+                    var id = res.Item.address_ref;
                     db.read('addresses', {
                         "key": {
                             "uuid": id
