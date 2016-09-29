@@ -142,18 +142,18 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
             if (tableName === 'customers') {
                 item = <ICustomer>{
                     email: payload.email,
-                    firstname: payload.firstname || "",
-                    lastname: payload.lastname || "",
-                    phonenumber: payload.phonenumber || "",
-                    address_ref: payload.address_ref || ""
+                    firstname: payload.firstname,
+                    lastname: payload.lastname,
+                    phonenumber: payload.phonenumber,
+                    address_ref: payload.address_ref
                 };
             } else if (tableName === 'addresses') {
                 item = <IAddress>{
                     uuid: payload.uuid,
-                    city: payload.city || "",
-                    street: payload.street || "",
-                    num: payload.num || "",
-                    zipcode: payload.zipcode || ""
+                    city: payload.city,
+                    street: payload.street,
+                    num: payload.num,
+                    zipcode: payload.zipcode
                 };
             }
             db.create(tableName, item, callback);
