@@ -10,7 +10,6 @@ var DBManager = (function () {
             TableName: tableName,
             Item: item
         };
-        console.log(params);
         this._db.put(params, callback);
     };
     DBManager.prototype.read = function (tableName, payload, callback) {
@@ -18,17 +17,27 @@ var DBManager = (function () {
             TableName: tableName,
             Key: payload.key
         };
-        console.log(params);
         this._db.get(params, callback);
     };
     DBManager.prototype.update = function (tableName, payload, callback) {
+        var qparams = {
+            TableName: tableName,
+            key: payload.key
+        };
+        var res;
+        this._db.get(qparams, function (err, r) {
+            res = r;
+        });
+        if (!res) {
+            callback(new Error("Email: " + payload.key.email + " does not exists."));
+            return;
+        }
         var params = {
             TableName: tableName,
             Key: payload.key,
             UpdateExpression: payload.expression,
             ExpressionAttributeValues: payload.values
         };
-        console.log(params);
         this._db.update(params, callback);
     };
     DBManager.prototype.delete = function (tableName, payload, callback) {
@@ -36,7 +45,6 @@ var DBManager = (function () {
             TableName: tableName,
             Key: payload.key
         };
-        console.log(params);
         this._db.delete(params, callback);
     };
     DBManager.prototype.find = function (tableName, payload, callback) {
@@ -45,7 +53,6 @@ var DBManager = (function () {
             FilterExpression: payload.expression,
             ExpressionAttributeValues: payload.values
         };
-        console.log(params);
         this._db.scan(params, callback);
     };
     return DBManager;
@@ -127,7 +134,7 @@ function handler(event, context, callback) {
                     var id = res.Item.address;
                     db.read('addresses', {
                         "key": {
-                            "UUID": id
+                            "uuid": id
                         }
                     }, callback);
                 }

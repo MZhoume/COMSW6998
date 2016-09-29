@@ -37,7 +37,6 @@ class DBManager {
             Item: item
         };
 
-        console.log(params);
         this._db.put(params, callback);
     }
 
@@ -47,11 +46,26 @@ class DBManager {
             Key: payload.key
         };
 
-        console.log(params);
         this._db.get(params, callback);
     }
 
     update(tableName: string, payload, callback: lambda.Callback) {
+        let qparams = {
+            TableName: tableName,
+            key: payload.key
+        };
+
+        let res;
+
+        this._db.get(qparams, (err, r) => {
+            res = r;
+        });
+
+        if (!res) {
+            callback(new Error("Email: " + payload.key.email + " does not exists."));
+            return;
+        }
+
         let params = {
             TableName: tableName,
             Key: payload.key,
@@ -59,7 +73,6 @@ class DBManager {
             ExpressionAttributeValues: payload.values
         };
 
-        console.log(params);
         this._db.update(<any>params, callback);
     }
 
@@ -69,7 +82,6 @@ class DBManager {
             Key: payload.key
         };
 
-        console.log(params);
         this._db.delete(params, callback);
     }
 
@@ -80,19 +92,18 @@ class DBManager {
             ExpressionAttributeValues: payload.values
         };
 
-        console.log(params);
         this._db.scan(params, callback);
     }
 }
 
 var Validator = {
     'email': (email: string): boolean => {
-        var regex = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
+        let regex = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
         return regex.test(email);
     },
 
     'zipcode': (zipcode: string): boolean => {
-        var regex = /^\d{5}$/;
+        let regex = /^\d{5}$/;
         return regex.test(zipcode);
     }
 };
@@ -163,7 +174,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
         case 'find':
             db.find(tableName, event.payload, callback);
             break;
-        
+
         case 'getaddr':
             db.read('customers', event.payload, (err, res) => {
                 if (res) {
@@ -175,6 +186,6 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
                     }, callback);
                 }
             });
-        break;
+            break;
     }
 }
