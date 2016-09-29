@@ -121,18 +121,15 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
     let db = new DBManager(dynamo);
     let tableName = event.tableName;
 
-    // TODO: refactor this ugly code
-    if (tableName === 'customers') {
-        if (event.operation === 'create') {
-            if (!validate(event.payload.item.email, 'email', callback)) {
-                return;
-            }
+    if (event.payload.item.email) {
+        if (!validate(event.payload.item.email, 'email', callback)) {
+            return;
         }
-    } else if (tableName === 'addresses') {
-        if (event.operation === 'create') {
-            if (!validate(event.payload.item.zipcode, 'zipcode', callback)) {
-                return;
-            }
+    }
+
+    if (event.payload.item.zipcode) {
+        if (!validate(event.payload.item.zipcode, 'zipcode', callback)) {
+            return;
         }
     }
 

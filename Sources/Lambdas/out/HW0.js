@@ -95,19 +95,14 @@ function handler(event, context, callback) {
     var dynamo = new sdk.DynamoDB.DocumentClient();
     var db = new DBManager(dynamo);
     var tableName = event.tableName;
-    // TODO: refactor this ugly code
-    if (tableName === 'customers') {
-        if (event.operation === 'create') {
-            if (!validate(event.payload.item.email, 'email', callback)) {
-                return;
-            }
+    if (event.payload.item.email) {
+        if (!validate(event.payload.item.email, 'email', callback)) {
+            return;
         }
     }
-    else if (tableName === 'addresses') {
-        if (event.operation === 'create') {
-            if (!validate(event.payload.item.zipcode, 'zipcode', callback)) {
-                return;
-            }
+    if (event.payload.item.zipcode) {
+        if (!validate(event.payload.item.zipcode, 'zipcode', callback)) {
+            return;
         }
     }
     switch (event.operation) {
