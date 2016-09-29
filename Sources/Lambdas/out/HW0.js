@@ -3,6 +3,14 @@
 var sdk = require('aws-sdk');
 var customerKeys = ['email', 'firstname', 'lastname', 'phonenumber', 'address_ref'];
 var addressKeys = ['uuid', 'city', 'street', 'num', 'zipcode'];
+function getKeys(tableName) {
+    if (tableName === 'customers') {
+        return customerKeys;
+    }
+    else if (tableName === 'addresses') {
+        return addressKeys;
+    }
+}
 var DBManager = (function () {
     function DBManager(_db) {
         this._db = _db;
@@ -23,25 +31,17 @@ var DBManager = (function () {
     };
     DBManager.prototype.update = function (tableName, payload, callback) {
         var _this = this;
-        var qparams = {
+        this._db.get({
             TableName: tableName,
             Key: payload.key
-        };
-        this._db.get(qparams, function (err, res) {
+        }, function (err, res) {
             if (!res) {
                 callback(new Error("Email: " + payload.key.email + " does not exists."));
                 return;
             }
-            var keys;
-            if (tableName === 'customers') {
-                keys = customerKeys;
-            }
-            else if (tableName === 'addresses') {
-                keys = addressKeys;
-            }
             var r = res.Item;
             var attributes = {};
-            keys.forEach(function (e) {
+            getKeys(tableName).forEach(function (e) {
                 if (payload.values[e] && r[e] !== payload.values[e]) {
                     attributes[e] = {
                         Action: "PUT",
@@ -95,6 +95,7 @@ function handler(event, context, callback) {
     var dynamo = new sdk.DynamoDB.DocumentClient();
     var db = new DBManager(dynamo);
     var tableName = event.tableName;
+    // TODO: refactor this ugly code
     if (tableName === 'customers') {
         if (event.operation === 'create') {
             if (!validate(event.payload.item.email, 'email', callback)) {
@@ -112,15 +113,8 @@ function handler(event, context, callback) {
     switch (event.operation) {
         case 'create':
             var item_1 = {};
-            var keys = void 0;
             var payload_1 = event.payload.item;
-            if (tableName === 'customers') {
-                keys = customerKeys;
-            }
-            else if (tableName === 'addresses') {
-                keys = addressKeys;
-            }
-            keys.forEach(function (e) {
+            getKeys(tableName).forEach(function (e) {
                 item_1[e] = payload_1[e];
             });
             db.create(tableName, item_1, callback);

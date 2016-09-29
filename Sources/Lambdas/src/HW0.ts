@@ -13,6 +13,14 @@ interface IDB {
 var customerKeys = ['email', 'firstname', 'lastname', 'phonenumber', 'address_ref'];
 var addressKeys = ['uuid', 'city', 'street', 'num', 'zipcode'];
 
+function getKeys(tableName: string): string[] {
+    if (tableName === 'customers') {
+        return customerKeys;
+    } else if (tableName === 'addresses') {
+        return addressKeys;
+    }
+}
+
 class DBManager {
     constructor(
         private _db: IDB
@@ -37,27 +45,18 @@ class DBManager {
     }
 
     update(tableName: string, payload, callback: lambda.Callback) {
-        let qparams = {
+        this._db.get({
             TableName: tableName,
             Key: payload.key
-        };
-
-        this._db.get(qparams, (err, res) => {
+        }, (err, res) => {
             if (!res) {
                 callback(new Error("Email: " + payload.key.email + " does not exists."));
                 return;
             }
 
-            let keys;
-            if (tableName === 'customers') {
-                keys = customerKeys;
-            } else if (tableName === 'addresses') {
-                keys = addressKeys;
-            }
-
             let r = res.Item;
             let attributes = {};
-            keys.forEach(e => {
+            getKeys(tableName).forEach(e => {
                 if (payload.values[e] && r[e] !== payload.values[e]) {
                     attributes[e] = {
                         Action: "PUT",
@@ -122,6 +121,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
     let db = new DBManager(dynamo);
     let tableName = event.tableName;
 
+    // TODO: refactor this ugly code
     if (tableName === 'customers') {
         if (event.operation === 'create') {
             if (!validate(event.payload.item.email, 'email', callback)) {
@@ -139,14 +139,8 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
     switch (event.operation) {
         case 'create':
             let item = {};
-            let keys;
             let payload = event.payload.item;
-            if (tableName === 'customers') {
-                keys = customerKeys;
-            } else if (tableName === 'addresses') {
-                keys = addressKeys;
-            }
-            keys.forEach(e => {
+            getKeys(tableName).forEach(e => {
                 item[e] = payload[e];
             });
 
