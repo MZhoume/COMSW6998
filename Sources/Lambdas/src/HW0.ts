@@ -116,21 +116,27 @@ function validate(data, validatorName, callback: lambda.Callback): boolean {
     return false;
 }
 
+function tryFind(payload, key: string): any {
+    if (payload.item && payload.item[key]) {
+        return payload.item[key];
+    } else if (payload.values && payload.values[key]) {
+        return payload.values[key];
+    }
+}
+
 export function handler(event, context: lambda.Context, callback: lambda.Callback) {
     let dynamo = new sdk.DynamoDB.DocumentClient();
     let db = new DBManager(dynamo);
     let tableName = event.tableName;
 
-    if (event.payload.item.email) {
-        if (!validate(event.payload.item.email, 'email', callback)) {
-            return;
-        }
+    let email = tryFind(event.payload, 'email');
+    if (email && !validate(email, 'email', callback)) {
+        return;
     }
 
-    if (event.payload.item.zipcode) {
-        if (!validate(event.payload.item.zipcode, 'zipcode', callback)) {
-            return;
-        }
+    let zipcode = tryFind(event.payload, 'zipcode');
+    if (zipcode && !validate(zipcode, 'zipcode', callback)) {
+        return;
     }
 
     switch (event.operation) {

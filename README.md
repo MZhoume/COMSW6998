@@ -66,8 +66,7 @@ import * as sdk from 'aws-sdk'
 - PUT
 ```
 {
-  "expression": xxx,
-  "values": xxx
+  "<field>": "<value>"
 }
 ```
 Expression example: "set firstname=:fn, lastname=:ln",
@@ -89,7 +88,6 @@ Values Example: {":fn": "fffnnn", ":ln": "lllnnn"}.
 - PUT
 ```
 {
-  "expression": xxx,
-  "values": xxx
+  "<field>": "<value>"
 }
 ```

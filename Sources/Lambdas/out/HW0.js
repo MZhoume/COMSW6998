@@ -91,19 +91,25 @@ function validate(data, validatorName, callback) {
     callback(new Error('Value: ' + data + ' is not validated as ' + validatorName));
     return false;
 }
+function tryFind(payload, key) {
+    if (payload.item && payload.item[key]) {
+        return payload.item[key];
+    }
+    else if (payload.values && payload.values[key]) {
+        return payload.values[key];
+    }
+}
 function handler(event, context, callback) {
     var dynamo = new sdk.DynamoDB.DocumentClient();
     var db = new DBManager(dynamo);
     var tableName = event.tableName;
-    if (event.payload.item.email) {
-        if (!validate(event.payload.item.email, 'email', callback)) {
-            return;
-        }
+    var email = tryFind(event.payload, 'email');
+    if (email && !validate(email, 'email', callback)) {
+        return;
     }
-    if (event.payload.item.zipcode) {
-        if (!validate(event.payload.item.zipcode, 'zipcode', callback)) {
-            return;
-        }
+    var zipcode = tryFind(event.payload, 'zipcode');
+    if (zipcode && !validate(zipcode, 'zipcode', callback)) {
+        return;
     }
     switch (event.operation) {
         case 'create':
