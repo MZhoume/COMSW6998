@@ -11,7 +11,9 @@
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-typescript": "^3.0.0",
+    "gulp-uglify": "^2.0.0",
     "merge2": "^1.0.2",
+    "pump": "^1.0.1",
     "typescript": "^2.0.3"
   }
 }
