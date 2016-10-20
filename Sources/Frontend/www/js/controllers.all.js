@@ -1,5 +1,5 @@
-/// <reference path="../../typings/index.d.ts" />
-/// <reference path="./services.ts" />
+/// <reference path="../../../typings/index.d.ts" />
+/// <reference path="../services/HttpService.ts" />
 var IndexCtrl = (function () {
     function IndexCtrl(_scope, _httpSvc) {
         this._scope = _scope;
@@ -20,3 +20,15 @@ var IndexCtrl = (function () {
 }());
 angular.module('app')
     .controller('IndexCtrl', IndexCtrl);
+
+/// <reference path="../../../typings/index.d.ts" />
+var ViewCtrl = (function () {
+    function ViewCtrl(_scope) {
+        this._scope = _scope;
+        _scope.name = 'World!';
+    }
+    ViewCtrl.$inject = ['$scope'];
+    return ViewCtrl;
+}());
+angular.module('app')
+    .controller('ViewCtrl', ViewCtrl);
