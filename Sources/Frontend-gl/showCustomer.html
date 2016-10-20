@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Search Customer | Typer's Project</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="description" content="The project of Typer" />
+
+        <link rel="stylesheet" type="text/css" href="./semantic/dist/semantic.min.css">
+        <script src="./semantic/dist/semantic.min.js"></script>
+        <script src="./jquery.min.js"></script>
+		    <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+      <div class="ui secondary pointing menu">
+      	<div class="header item">Typer's Project</div>
+		  <div class="right menu">
+			  <a class="active item" href="#">Home</a>
+		  </div>
+	  </div>
+
+	  <div class="main ui container">
+
+        <div class="ui grid" style="margin-top: 50px">
+          <div class="three wide column"></div>
+          <div class="ten wide column">
+          <form class="ui form" action="https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/customers/{email}">
+            <div class="field ui icon input" style="width: 100%">
+              <input type="text" name="email" placeholder="Customer Email">
+              <i class="search link icon"></i>
+            </div>
+          </form>
+          </div>
+        </div>
+
+        <table class="ui very basic table" id="customertable">
+          <thead>
+            <tr>
+              <th>Fisrname</th>
+              <th>Lastname</th>
+              <th>Email</th>
+              <th>Phone Number</th>
+              <th>Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Donald</td>
+              <td>Ferguson</td>
+              <td>dff9@columbia.edu</td>
+              <td>911</td>
+              <td>1600 Pennsylvnia Avenue, DC</td>
+            </tr>
+          </tbody>
+        </table>
+	  </div>
+
+		<div class="ui text menu">
+    	  <div class="item copyright">Copyright &copy; 2016 Typer. All rights reserved.</div>
+		</div>
+	</body>
+</html>
