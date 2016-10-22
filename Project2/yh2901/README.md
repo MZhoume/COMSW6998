@@ -3,7 +3,7 @@ things I found/changed:
  regarding calling smarty street:   
        1. smarty street responses to HTTPS request only not HTTP  
        2. zipcode was left out of the params   
-       3. I moved the entire address validation funciton inside the Handler's switch case, in order to access the https response directly
+       3. I moved the entire address validation funciton inside the Handler's switch case, in order to access the https response directly  
        4. needs req.end(); otherwise, socket gets hung up!
 
  regarding error codes:   
