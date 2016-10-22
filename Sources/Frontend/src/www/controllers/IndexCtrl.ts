@@ -1,5 +1,5 @@
-/// <reference path="../../typings/index.d.ts" />
-/// <reference path="./services.ts" />
+/// <reference path="../../../typings/index.d.ts" />
+/// <reference path="../services/HttpService.ts" />
 
 interface IIndexScope extends angular.IScope {
     time: string;

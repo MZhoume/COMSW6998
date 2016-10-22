@@ -4,17 +4,18 @@
 <head>
 	<meta charset="UTF-8">
 	<title>COMS6998 DEMO</title>
-	<link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css">
-	<script src="lib/jquery/dist/jquery.min.js"></script>
-	<script src="lib/angular/angular.min.js"></script>
-	<script src="lib/bootstrap/dist/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.css">
+	<script src="lib/jquery/dist/jquery.js"></script>
+	<script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+	<script src="lib/angular/angular.js"></script>
+	<script src="lib/angular-route/angular-route.js"></script>
 	<script src="js/index.js"></script>
-	<script src="js/services.js"></script>
-	<script src="js/controllers.js"></script>
+	<script src="js/services.all.js"></script>
+	<script src="js/controllers.all.js"></script>
 </head>
 
-<body ng-controller="IndexCtrl">
-	<p>The current time is: {{time}}</p>
+<body>
+	<ng-view></ng-view>
 </body>
 
 </html>

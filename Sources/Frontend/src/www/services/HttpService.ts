@@ -1,4 +1,4 @@
-/// <reference path="../../typings/index.d.ts" />
+/// <reference path="../../../typings/index.d.ts" />
 
 interface ICallback {
     onSuccess(statCode: number, data: any): void;
@@ -11,7 +11,7 @@ interface IHttpService {
 }
 
 class HttpService implements IHttpService {
-    private _urlBase = 'http://localhost';
+    private _urlBase = '';
 
     static $inject = ['$http'];
     constructor(

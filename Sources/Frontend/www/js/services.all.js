@@ -1,8 +1,8 @@
-/// <reference path="../../typings/index.d.ts" />
+/// <reference path="../../../typings/index.d.ts" />
 var HttpService = (function () {
     function HttpService(_http) {
         this._http = _http;
-        this._urlBase = 'http://localhost';
+        this._urlBase = '';
     }
     HttpService.prototype.init = function (urlBase) {
         if (urlBase.indexOf('/', urlBase.length - '/'.length) !== -1) {
