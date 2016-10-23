@@ -1,8 +1,8 @@
 ### update on Oct 22 2016:##
 
-project2lambdav3.js
-integrated upon Wutong's lambda 
-bugs fixed:
+project2lambdav3.js  
+integrated upon Wutong's lambda   
+bugs fixed:  
  1. email and zipcode validation were called improperlly: switch case will go through due to insynchronous call, solved using if else
  2. catch SmartyStreet no return error (make it invalidAddressError) 
  
