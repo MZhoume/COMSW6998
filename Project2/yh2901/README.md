@@ -8,8 +8,8 @@ bugs fixed:
  
       
 --------------------
-### update on Oct 21 2016:#
-
+### update on Oct 21 2016:#  
+projecr2lambdav2.js  
 observation && modifications:
  regarding calling smarty street:   
        1. smarty street responses to HTTPS request only not HTTP  
