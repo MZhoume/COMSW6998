@@ -1,3 +1,6 @@
+update on Oct 22 2016:
+
+
 things I found/changed:
 
  regarding calling smarty street:   
