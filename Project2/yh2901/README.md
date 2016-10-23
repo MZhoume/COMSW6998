@@ -1,4 +1,5 @@
 update on Oct 22 2016:
+
 project2lambdav3.js
 integrated upon Wutong's lambda 
 bugs fixed:
@@ -6,9 +7,10 @@ bugs fixed:
  2. catch SmartyStreet no return error (make it invalidAddressError) 
  
       
+--------------------
+update on Oct 21 2016:
 
-things I found/changed: 
-
+observation && modifications:
  regarding calling smarty street:   
        1. smarty street responses to HTTPS request only not HTTP  
        2. zipcode was left out of the params   
