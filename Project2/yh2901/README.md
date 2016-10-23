@@ -1,4 +1,4 @@
-update on Oct 22 2016:
+### update on Oct 22 2016:##
 
 project2lambdav3.js
 integrated upon Wutong's lambda 
@@ -8,7 +8,7 @@ bugs fixed:
  
       
 --------------------
-update on Oct 21 2016:
+### update on Oct 21 2016:#
 
 observation && modifications:
  regarding calling smarty street:   
