@@ -17,7 +17,6 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "angular": "^1.5.8",
-    "angular-ui-select": "^0.19.5",
     "angular-route": "^1.5.8"
   }
 }
