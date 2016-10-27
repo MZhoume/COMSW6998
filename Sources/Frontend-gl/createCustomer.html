@@ -21,8 +21,7 @@
     </div>
     <div class="main ui container">
         <div class="ui grid" style="margin-top: 50px">
-            <div class="three wide column"></div>
-            <div class="ten wide column">
+            <div class="ten wide centered column">
                 <form class="ui form">
                     <h4 class="ui dividing header">Create Customer</h4>
                     <div class="field">
@@ -32,7 +31,11 @@
                             <div class="field"><input type="text" name="lastname" placeholder="Last Name"></div>
                         </div>
                         <div class="two fields">
-                            <div class="field"><input type="text" name="email" placeholder="Email"></div>
+                            <div class="field">
+                                <input type="text" name="email" placeholder="Email">
+                                <div class="ui pointing red basic label" id="email-dup-err">Email already registered. <a herf="login.html">Log in</a> or change one.</div>
+                                <div class="ui pointing red basic label" id="email-invalid-err">Email not valid.</div>
+                            </div>
                             <div class="field"><input type="text" name="phonenumber" placeholder="Phone Number"></div>
                         </div>
                     </div>
@@ -97,6 +100,15 @@
         */
         
 		$(document).ready(function(){
+            $("input[name='email']").focus(function(){
+                $("#email-dup-err").hide();
+                $("#email-invalid-err").hide();
+            });
+            $("input[name='email']").blur(function(){
+                checkEmail($(this).val());
+            });
+
+
 			$("#createbtn").click(function() {
 				var customerUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/customers";
 				var addrUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/addresses/";
@@ -141,6 +153,23 @@
 				});*/
 			});
 		});
+
+        function checkEmail(email) {
+            var regex = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
+            if(regex.test(email)) {
+                var customerUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/customers/" + email;
+                $.getJSON(customerUrl, function(data) {
+                    if(data.item != "") {
+                        $("#email-invalid-err").hide();
+                        $("#email-dup-err").show();
+                    }
+                });
+            }
+            else {
+                $("#email-dup-err").hide();
+                $("#email-invalid-err").show();
+            }
+        };
 		</script>
 
     <script>
