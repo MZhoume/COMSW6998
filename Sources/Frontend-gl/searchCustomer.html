@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Homepage | Typer's Project</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="description" content="The project of Typer" />
+
+        <link rel="stylesheet" type="text/css" href="./semantic/dist/semantic.min.css">
+        <script src="./semantic/dist/semantic.min.js"></script>
+		<script src="./jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+      <div class="ui secondary pointing menu">
+      	<div class="header item">Typer's Project</div>
+		  <div class="right menu">
+			  <a class="active item" href="#">Home</a>
+		  </div>
+	  </div>
+
+	  <div class="main ui container">
+			<h1 class="ui center aligned header" style="margin:50px 0 50px 0;">Welcome to Typer's Project</h1>
+
+			<div class="ui grid" style="margin-top: 50px">
+				<div class="three wide column"></div>
+				<div class="ten wide column">
+				<!--<form class="ui form" onsubmit="search()">-->
+				<form class="ui form">
+					<div class="field ui icon input" id="searchform" style="width: 100%">
+						<input type="text" name="email" id="email" placeholder="Customer Email">
+						<i class="search link icon" id="search"></i>
+					</div>
+				</form>
+				</div>
+			</div>
+
+			<div class="searchresult">
+				<h5 class="ui center aligned header">No result found</h5>
+				<table class="ui blue table">
+					<thead>
+						<tr><th colspan="6">Customer search result</th></tr>
+						<tr>
+							<th>Fisrname</th>
+							<th>Lastname</th>
+							<th>Email</th>
+							<th>Phone Number</th>
+							<th>Address</th>
+							<th>Operation</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+	  </div>
+
+		<div class="ui text menu">
+    	  <div class="item copyright">Copyright &copy; 2016 Typer. All rights reserved.</div>
+		</div>
+
+		<script>
+		$(document).ready(function(){
+			$("#search").click(function() {
+				var emailVal = $("#email").val();
+				var customerUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/customers/" + emailVal;
+				var addrUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/addresses/";
+				$.getJSON(customerUrl, function(data) {
+					if(data.item != "") {
+						$(".searchresult table tbody tr td:first-child").html(data.item["firstname"]);
+						$(".searchresult table tbody tr td:nth-child(2)").html(data.item["lastname"]);
+						$(".searchresult table tbody tr td:nth-child(3)").html(data.item["email"]);
+						$(".searchresult table tbody tr td:nth-child(4)").html(data.item["phonenumber"]);
+						addrUrl += data.item["Delivery_Point_Barcode"];
+						$(".searchresult table tbody tr td:nth-child(5)").html('<a href="' + addrUrl + '">See address</a>');
+						$(".searchresult table tbody tr td:last-child").html("");
+						$(".searchresult table tbody tr td:last-child").append('<a href="createCustomer.html"><button class="ui yellow basic button">Update</button></a>');
+						$(".searchresult table tbody tr td:last-child").append('<a href="' + customerUrl + '"><button class="ui red basic button">Delete</button></a>');
+						$(".searchresult h5").hide();
+						$(".searchresult table").show();
+					}
+					else {
+						$(".searchresult table").hide();
+						$(".searchresult h5").show();
+					}
+				});
+			});
+		});
+		</script>
+	</body>
+</html>
