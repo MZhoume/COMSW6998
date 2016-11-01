@@ -1,6 +1,9 @@
 /// <reference path="../typings/index.d.ts" />
+/// <reference path="./Keys.ts" />
+
 import * as sdk from 'aws-sdk'
 import * as lambda from 'aws-lambda'
+import * as request from 'request'
 
 interface IDB {
     put(params, callback);
@@ -11,7 +14,7 @@ interface IDB {
 }
 
 var customerKeys = ['email', 'firstname', 'lastname', 'phonenumber', 'address_ref'];
-var addressKeys = ['uuid', 'city', 'street', 'num', 'zipcode'];
+var addressKeys = ['delivery_point_barcode', 'city', 'street', 'num', 'zipcode'];
 
 function getKeys(tableName: string): string[] {
     if (tableName === 'customers') {
@@ -50,7 +53,7 @@ class DBManager {
             Key: payload.key
         }, (err, res) => {
             if (!res) {
-                callback(new Error("Email: " + payload.key.email + " does not exists."));
+                console.log("Email: " + payload.key.email + " does not exists.");
                 return;
             }
 
@@ -114,7 +117,7 @@ function validate(data, validatorName, callback: lambda.Callback): boolean {
     if (data && Validator[validatorName](data)) {
         return true;
     }
-    callback(new Error('Value: ' + data + ' is not validated as ' + validatorName));
+    console.log('Value: ' + data + ' is not validated as ' + validatorName);
     return false;
 }
 
@@ -124,6 +127,23 @@ function tryFind(payload, key: string): any {
     } else if (payload.values && payload.values[key]) {
         return payload.values[key];
     }
+}
+
+interface ILambdaError {
+    code: number;
+    message: string;
+}
+
+class LambdaError implements ILambdaError {
+    constructor(
+        public code: number,
+        public message: string
+    ) {        
+    }
+}
+
+function getAddress(zipcode): any {
+    
 }
 
 export function handler(event, context: lambda.Context, callback: lambda.Callback) {
