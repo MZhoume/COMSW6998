@@ -18,7 +18,7 @@ var Validator = {
 };
 
 export function validate(payload: any, fieldName: string, callback: lambda.Callback): boolean {
-    let data = tryFind(payload, fieldName);
+    let data = tryFind(payload, fieldName, undefined);
     if (data && Validator[fieldName](data)) {
         return true;
     }

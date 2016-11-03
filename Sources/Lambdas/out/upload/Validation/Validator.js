@@ -14,7 +14,7 @@ var Validator = {
     }
 };
 function validate(payload, fieldName, callback) {
-    var data = Helpers_1.tryFind(payload, fieldName);
+    var data = Helpers_1.tryFind(payload, fieldName, undefined);
     if (data && Validator[fieldName](data)) {
         return true;
     }

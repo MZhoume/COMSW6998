@@ -1,1 +1,0 @@
-"use strict";function tryFind(t,e){return t.item&&t.item[e]?t.item[e]:t.values&&t.values[e]?t.values[e]:void 0}exports.tryFind=tryFind;

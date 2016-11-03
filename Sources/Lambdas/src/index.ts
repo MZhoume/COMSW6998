@@ -1,16 +1,14 @@
 /// <reference path="../typings/index.d.ts" />
 
-import * as sdk from 'aws-sdk'
 import * as lambda from 'aws-lambda'
 import * as request from 'request'
-import { DBManager } from './DB/DBManager'
+import { DynamoDBManager } from './DB/DynamoDBManager'
 import { getKeys } from './DB/Fields'
 import { validate } from './Validation/Validator'
-import { LambdaError } from './LambdaError'
+import { genLambdaError } from './Helpers'
 
 export function handler(event, context: lambda.Context, callback: lambda.Callback) {
-    let dynamo = new sdk.DynamoDB.DocumentClient();
-    let db = new DBManager(dynamo);
+    let db = new DynamoDBManager();
     let tableName = event.tableName;
 
     if (!validate(event.payload, 'email', callback)

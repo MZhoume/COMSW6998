@@ -1,1 +1,0 @@
-"use strict";function getKeys(tableName){return eval(tableName+"Fields")}var customerFields=["email","firstname","lastname","phonenumber","address_ref"],addressFields=["delivery_point_barcode","city","street","num","zipcode"];exports.getKeys=getKeys;

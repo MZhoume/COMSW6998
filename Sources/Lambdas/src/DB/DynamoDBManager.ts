@@ -1,13 +1,16 @@
 /// <reference path="../../typings/index.d.ts" />
 
+import * as sdk from 'aws-sdk'
 import * as lambda from 'aws-lambda'
-import { IDB } from '../Interface/IDB'
 import { getKeys } from '../DB/Fields'
+import { IDBManager } from '../Interface/IDBManager'
 
-export class DBManager {
-    constructor(
-        private _db: IDB
-    ) { }
+export class DynamoDBManager implements IDBManager {
+    _db: sdk.DynamoDB.DocumentClient;
+
+    constructor() {
+        this._db = new sdk.DynamoDB.DocumentClient();
+     }
 
     create(tableName: string, payload, callback: lambda.Callback) {
         let item = {};

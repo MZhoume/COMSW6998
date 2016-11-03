@@ -1,11 +1,9 @@
 /// <reference path="../typings/index.d.ts" />
 "use strict";
-var sdk = require('aws-sdk');
-var DBManager_1 = require('./DB/DBManager');
+var DynamoDBManager_1 = require('./DB/DynamoDBManager');
 var Validator_1 = require('./Validation/Validator');
 function handler(event, context, callback) {
-    var dynamo = new sdk.DynamoDB.DocumentClient();
-    var db = new DBManager_1.DBManager(dynamo);
+    var db = new DynamoDBManager_1.DynamoDBManager();
     var tableName = event.tableName;
     if (!Validator_1.validate(event.payload, 'email', callback)
         || !Validator_1.validate(event.payload, 'zipcode', callback)) {
