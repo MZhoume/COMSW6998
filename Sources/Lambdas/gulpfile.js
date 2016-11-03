@@ -5,24 +5,24 @@ var uglify = require('gulp-uglify')
 var pump = require('pump')
 
 var paths = {
-  src: ['./src/**/*.ts'],
-  out: ['./out/**/*.js']
+    src: ['./src/**/*.ts'],
+    out: ['./out/**/*.js']
 };
 
-gulp.task('default', ['scripts', 'compress']);
+gulp.task('default', ['scripts']);
 
 gulp.task('scripts', function () {
-    var tsResult = gulp.src(paths.src)
+    gulp.src(paths.src)
         .pipe(typescript({}))
         .js
-        .pipe(gulp.dest('./out/'));
+        .pipe(gulp.dest('./out/upload/'));
 });
 
-gulp.task('watch', function() {
-    gulp.watch(paths.src, ['scripts', 'compress']);
+gulp.task('watch', function () {
+    gulp.watch(paths.src, ['scripts']);
 });
 
-gulp.task('compress', function(cb) {
+gulp.task('compress', function (cb) {
     pump([
         gulp.src(paths.out),
         uglify(),

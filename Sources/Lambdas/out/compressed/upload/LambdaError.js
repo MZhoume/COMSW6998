@@ -1,0 +1,1 @@
+"use strict";var LambdaError=function(){function r(r,a){this.code=r,this.message=a}return r}();exports.LambdaError=LambdaError;
