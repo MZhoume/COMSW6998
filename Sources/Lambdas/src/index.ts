@@ -5,7 +5,7 @@ import * as request from 'request'
 import { DynamoDBManager } from './DB/DynamoDBManager'
 import { getKeys } from './DB/Fields'
 import { validate } from './Validation/Validator'
-import { genLambdaError } from './Helpers'
+import { LambdaError } from './LambdaError'
 
 export function handler(event, context: lambda.Context, callback: lambda.Callback) {
     let db = new DynamoDBManager();

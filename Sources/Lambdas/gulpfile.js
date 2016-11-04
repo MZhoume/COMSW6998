@@ -1,31 +1,39 @@
 var gulp = require('gulp');
 var typescript = require('gulp-typescript');
-var merge2 = require('merge2');
-var uglify = require('gulp-uglify')
-var pump = require('pump')
+var del = require('del');
+var zip = require('gulp-zip');
 
 var paths = {
-    src: ['./src/**/*.ts'],
-    out: ['./out/**/*.js']
+    src: ['src/**/*.ts'],
+    out: ['out/**', '!out', '!out/node_modules', '!out/node_modules/**'],
+    zip: ['out/**']
 };
 
-gulp.task('default', ['scripts']);
+gulp.task('default', ['build']);
 
-gulp.task('scripts', function () {
-    gulp.src(paths.src)
+gulp.task('build', function () {
+    return gulp.src(paths.src)
         .pipe(typescript({}))
         .js
-        .pipe(gulp.dest('./out/upload/'));
+        .pipe(gulp.dest('./out/'));
+});
+
+gulp.task('clean', function () {
+    return del(paths.out);
+});
+ 
+gulp.task('zip', function() {
+    return gulp.src(paths.zip)
+        .pipe(zip('lambda.zip'))
+        .pipe(gulp.dest('./'));
+});
+
+gulp.task('deploy', function() {
+    gulp.task('clean');
+    gulp.task('build');
+    gulp.task('zip');
 });
 
 gulp.task('watch', function () {
-    gulp.watch(paths.src, ['scripts']);
+    gulp.watch(paths.src, ['build']);
 });
-
-gulp.task('compress', function (cb) {
-    pump([
-        gulp.src(paths.out),
-        uglify(),
-        gulp.dest('./out/compressed/')
-    ])
-})
