@@ -1,7 +1,7 @@
 /// <reference path="../../typings/index.d.ts" />
 
-import * as lambda from 'aws-lambda'
-import { tryFind } from '../Helpers'
+import { tryFind } from '../Helpers/Helpers';
+import { HttpCodes } from '../Helpers/HttpCodes';
 
 var Validator = {
     'email': (email: string): boolean => {
@@ -17,11 +17,7 @@ var Validator = {
     }
 };
 
-export function validate(payload: any, fieldName: string, callback: lambda.Callback): boolean {
+export function validate(payload: any, fieldName: string): boolean {
     let data = tryFind(payload, fieldName, undefined);
-    if (data && Validator[fieldName](data)) {
-        return true;
-    }
-    console.log(data + ' does not validated as ' + fieldName);
-    return false;
+    return data && Validator[fieldName](data);
 }

@@ -7,16 +7,31 @@ var DynamoDBManager = (function () {
         this._db = new sdk.DynamoDB.DocumentClient();
     }
     DynamoDBManager.prototype.create = function (tableName, payload, callback) {
-        var item = {};
-        var origin = payload.item;
-        Fields_1.getKeys(tableName).forEach(function (e) {
-            item[e] = origin[e];
-        });
-        var params = {
+        var _this = this;
+        var k = Fields_1.getFields(tableName)[0];
+        var readKey = {};
+        readKey[k] = payload[k];
+        this._db.get({
             TableName: tableName,
-            Item: item
-        };
-        this._db.put(params, callback);
+            Key: readKey
+        }, function (err, res) {
+            if (res && res.Item) {
+                var value = payload[k];
+                callback(k + ': ' + value + ' already exists.');
+            }
+            else {
+                var item_1 = {};
+                var origin_1 = payload.item;
+                Fields_1.getFields(tableName).forEach(function (e) {
+                    item_1[e] = origin_1[e];
+                });
+                var params = {
+                    TableName: tableName,
+                    Item: item_1
+                };
+                _this._db.put(params, callback);
+            }
+        });
     };
     DynamoDBManager.prototype.read = function (tableName, payload, callback) {
         var params = {
@@ -31,26 +46,29 @@ var DynamoDBManager = (function () {
             TableName: tableName,
             Key: payload.key
         }, function (err, res) {
-            if (!res) {
-                console.log("Email: " + payload.key.email + " does not exists.");
-                return;
+            if (!res || !res.Item) {
+                var key = Object.keys(payload.key)[0];
+                var value = payload.key[key];
+                callback(key + ': ' + value + ' does not exist.');
             }
-            var r = res.Item;
-            var attributes = {};
-            Fields_1.getKeys(tableName).forEach(function (e) {
-                if (payload.values[e] && r[e] !== payload.values[e]) {
-                    attributes[e] = {
-                        Action: "PUT",
-                        Value: payload.values[e]
-                    };
-                }
-            });
-            var params = {
-                TableName: tableName,
-                Key: payload.key,
-                AttributeUpdates: attributes
-            };
-            _this._db.update(params, callback);
+            else {
+                var r_1 = res.Item;
+                var attributes_1 = {};
+                Fields_1.getFields(tableName).forEach(function (e) {
+                    if (payload.values[e] && r_1[e] !== payload.values[e]) {
+                        attributes_1[e] = {
+                            Action: "PUT",
+                            Value: payload.values[e]
+                        };
+                    }
+                });
+                var params = {
+                    TableName: tableName,
+                    Key: payload.key,
+                    AttributeUpdates: attributes_1
+                };
+                _this._db.update(params, callback);
+            }
         });
     };
     DynamoDBManager.prototype.delete = function (tableName, payload, callback) {

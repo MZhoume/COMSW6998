@@ -1,6 +1,6 @@
 /// <reference path="../../typings/index.d.ts" />
 "use strict";
-var Helpers_1 = require('../Helpers');
+var Helpers_1 = require('../Helpers/Helpers');
 var Validator = {
     'email': function (email) {
         // TODO: add comment about this regex
@@ -13,12 +13,8 @@ var Validator = {
         return regex.test(zipcode);
     }
 };
-function validate(payload, fieldName, callback) {
+function validate(payload, fieldName) {
     var data = Helpers_1.tryFind(payload, fieldName, undefined);
-    if (data && Validator[fieldName](data)) {
-        return true;
-    }
-    console.log(data + ' does not validated as ' + fieldName);
-    return false;
+    return data && Validator[fieldName](data);
 }
 exports.validate = validate;

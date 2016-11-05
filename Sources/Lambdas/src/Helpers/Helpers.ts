@@ -6,3 +6,7 @@ export function tryFind(payload: any, key: string, def: any): any {
     }
     return def;
 }
+
+export function genLambdaError(code: number, message: string) {
+    return new Error(JSON.stringify({ code: code, message: message }));
+}

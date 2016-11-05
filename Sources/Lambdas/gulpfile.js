@@ -33,31 +33,15 @@ gulp.task('clean', function () {
     return del(paths.out);
 });
 
-gulp.task('zip', function () {
+gulp.task('zip', ['build'], function () {
     return gulp.src(paths.zip)
         .pipe(zip('lambda.zip'))
         .pipe(gulp.dest('./'));
 });
-
-gulp.task('upload', function () {
-    gulp.src('./lambda.zip')
-        .pipe(s3({
-            Bucket: 'coms-lambda'
-        }, {
-            maxRetries: 5
-        }));
-});
  
-gulp.task('upload', function() {
+gulp.task('upload', ['clean', 'build', 'zip'], function() {
     return gulp.src('./lambda.zip')
         .pipe(lambda(params, options));
-});
-
-gulp.task('deploy', function () {
-    gulp.task('clean');
-    gulp.task('build');
-    gulp.task('zip');
-    gulp.task('upload');
 });
 
 gulp.task('watch', function () {

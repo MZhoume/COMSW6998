@@ -1,2 +1,2 @@
-export var ss_auth_id = 'b5b6289f-138b-825e-a95a-87574806cd23';
-export var ss_auth_token = '3tCVDM2HHvhzgArUth4O';
+export const SS_AuthId = 'b5b6289f-138b-825e-a95a-87574806cd23';
+export const SS_AuthToken = '3tCVDM2HHvhzgArUth4O';
