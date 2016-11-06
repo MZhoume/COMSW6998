@@ -10,6 +10,7 @@ import { validateAddress } from './Validation/AddressValidation';
 import { genLambdaError } from './Helpers/Helpers';
 import { HttpCodes } from './Helpers/HttpCodes';
 import { ISmartyStreetResponse } from './Interface/ISmartyStreetResponse';
+import { getRules } from './DB/Fields';
 
 function genericCallback(err: any, res: any, callback: lambda.Callback) {
     if (err) {
@@ -35,15 +36,18 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
 
     switch (event.operation) {
         case 'create':
-            if (tableName === 'addresses') {
-                if (validate(event.payload, 'zipcode')) {
-                    callback(genLambdaError(HttpCodes.BadRequest, 'Zipcode is not valid'));
-                } else {
-                    checkAddress(event.payload, callback, addr => db.create(tableName, addr, (err, res) => genericCallback(err, res, callback)));
+            let hasError = false;
+            getRules(tableName).forEach(r => {
+                // TODO: check user's address and put the barcode
+                if (!hasError && !validate(event.payload, r)) {
+                    callback(genLambdaError(HttpCodes.BadRequest, r + ' is not valid'));
+                    hasError = true;
                 }
-            } else {
-                if (validate(event.payload, 'email')) {
-                    callback(genLambdaError(HttpCodes.BadRequest, 'Email is not valid'));
+            });
+            
+            if (!hasError) {
+                if (tableName === 'addresses') {
+                    checkAddress(event.payload, callback, addr => db.create(tableName, addr, (err, res) => genericCallback(err, res, callback)));
                 } else {
                     db.create(tableName, event.payload, (err, res) => genericCallback(err, res, callback));
                 }
@@ -56,7 +60,17 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
 
         case 'update':
             if (tableName === 'addresses') {
-                checkAddress(event.payload, callback, addr => db.update(tableName, addr, (err, res) => genericCallback(err, res, callback)));
+                checkAddress(event.payload, callback, addr => {
+                    db.read('addresses', { key: { delivery_point_barcode: addr.delivery_point_barcode } }, (err, res) => {
+                        if (res && res.Item) {
+                            // TODO: find specific user and update it
+                            // db.update('customers', {})
+                        } else {
+                            db.create(tableName, addr, (err, res) => genericCallback(err, res, callback));
+                            // TODO: find specific user and update it
+                        }
+                    });
+                });
             } else {
                 db.update(tableName, event.payload, (err, res) => genericCallback(err, res, callback));
             }
@@ -74,11 +88,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
             db.read('customers', event.payload, (err, res) => {
                 if (res) {
                     let barcode = res.Item.delivery_point_barcode;
-                    db.read('addresses', {
-                        "key": {
-                            "delivery_point_barcode": barcode
-                        }
-                    }, callback);
+                    db.read('addresses', { "key": { delivery_point_barcode: barcode } }, callback);
                 }
             });
             break;

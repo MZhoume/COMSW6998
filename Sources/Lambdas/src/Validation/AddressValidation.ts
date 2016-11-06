@@ -23,12 +23,13 @@ export function validateAddress(payload: any,
                 callback("Invalid Address");
             } else {
                 let sug = suggestions[0];
+                console.log('SS response: ' + sug);
                 let addr = <ISmartyStreetResponse>{
                     delivery_point_barcode: sug.delivery_point_barcode,
-                    city: sug.components.city_name,
-                    street: sug.components.primary_number + ' ' + sug.components.street_predirection + ' ' + sug.components.street_postdirection + ' ' + sug.components.street_suffix,
-                    num: sug.components.secondary_designator + ' ' + sug.components.secondary_number,
-                    zipcode: sug.components.zipcode
+                    city: (sug.components.city_name || ''),
+                    street: (sug.components.primary_number || '') + ' ' + (sug.components.street_predirection || '') + ' ' + (sug.components.street_name || '') + ' ' + (sug.components.street_postdirection || '') + ' ' + (sug.components.street_suffix || ''),
+                    num: (sug.components.secondary_designator || '') + ' ' + (sug.components.secondary_number || ''),
+                    zipcode: (sug.components.zipcode || '')
                 };
 
                 callback(null, addr);

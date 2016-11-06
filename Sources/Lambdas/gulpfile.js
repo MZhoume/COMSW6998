@@ -33,16 +33,18 @@ gulp.task('clean', function () {
     return del(paths.out);
 });
 
-gulp.task('zip', ['build'], function () {
+gulp.task('zip', function () {
     return gulp.src(paths.zip)
         .pipe(zip('lambda.zip'))
         .pipe(gulp.dest('./'));
 });
  
-gulp.task('upload', ['clean', 'build', 'zip'], function() {
+gulp.task('upload', function() {
     return gulp.src('./lambda.zip')
         .pipe(lambda(params, options));
 });
+
+gulp.task('deploy', ['clean', 'build', 'zip', 'upload'], function() {});
 
 gulp.task('watch', function () {
     gulp.watch(paths.src, ['build']);

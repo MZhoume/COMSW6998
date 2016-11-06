@@ -24,13 +24,11 @@ export class DynamoDBManager implements IDBManager {
             Key: readKey
         }, (err, res) => {
             if (res && res.Item) {
-                let value = payload[k];
-                callback(k + ': ' + value + ' already exists.');
+                callback(payload[k] + ' already exists.');
             } else {
                 let item = {};
-                let origin = payload.item;
                 getFields(tableName).forEach(e => {
-                    item[e] = origin[e];
+                    item[e] = payload[e];
                 });
 
                 let params = {
@@ -58,9 +56,7 @@ export class DynamoDBManager implements IDBManager {
             Key: payload.key
         }, (err, res) => {
             if (!res || !res.Item) {
-                let key = Object.keys(payload.key)[0];
-                let value = payload.key[key];
-                callback(key + ': ' + value + ' does not exist.');
+                callback(payload.key[0] + ' does not exist.');
             } else {
                 let r = res.Item;
                 let attributes = {};

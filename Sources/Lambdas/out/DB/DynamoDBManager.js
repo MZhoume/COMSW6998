@@ -16,14 +16,12 @@ var DynamoDBManager = (function () {
             Key: readKey
         }, function (err, res) {
             if (res && res.Item) {
-                var value = payload[k];
-                callback(k + ': ' + value + ' already exists.');
+                callback(payload[k] + ' already exists.');
             }
             else {
                 var item_1 = {};
-                var origin_1 = payload.item;
                 Fields_1.getFields(tableName).forEach(function (e) {
-                    item_1[e] = origin_1[e];
+                    item_1[e] = payload[e];
                 });
                 var params = {
                     TableName: tableName,
@@ -47,9 +45,7 @@ var DynamoDBManager = (function () {
             Key: payload.key
         }, function (err, res) {
             if (!res || !res.Item) {
-                var key = Object.keys(payload.key)[0];
-                var value = payload.key[key];
-                callback(key + ': ' + value + ' does not exist.');
+                callback(payload.key[0] + ' does not exist.');
             }
             else {
                 var r_1 = res.Item;
