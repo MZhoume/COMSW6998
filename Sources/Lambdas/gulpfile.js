@@ -24,7 +24,9 @@ gulp.task('default', ['build']);
 
 gulp.task('build', function () {
     return gulp.src(paths.src)
-        .pipe(typescript({}))
+        .pipe(typescript({
+            target: 'ES6'
+        }))
         .js
         .pipe(gulp.dest('./out/'));
 });

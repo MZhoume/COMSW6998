@@ -1,102 +1,91 @@
 /// <reference path="../../typings/index.d.ts" />
 
-import * as sdk from 'aws-sdk';
+import { DynamoDBAsync } from './DynamoDBAsync';
 import { getFields } from '../DB/Fields';
 import { IDBManager } from '../Interface/IDBManager';
-import { IDBCallback } from '../Interface/IDBCallback';
-import { HttpCodes } from '../Helpers/HttpCodes';
-
+import { tryFind } from '../Helpers/Helpers';
 
 export class DynamoDBManager implements IDBManager {
-    _db: sdk.DynamoDB.DocumentClient;
+    _db: DynamoDBAsync;
 
     constructor() {
-        this._db = new sdk.DynamoDB.DocumentClient();
+        this._db = new DynamoDBAsync();
     }
 
-    create(tableName: string, payload: any, callback: IDBCallback) {
+    async create(tableName: string, payload: any): Promise<any> {
         let k = getFields(tableName)[0];
         let readKey = {};
-        readKey[k] = payload[k];
+        readKey[k] = tryFind(payload, k, undefined);
 
-        this._db.get({
+        let r = await this._db.get({
             TableName: tableName,
             Key: readKey
-        }, (err, res) => {
-            if (res && res.Item) {
-                callback(payload[k] + ' already exists.');
-            } else {
-                let item = {};
-                getFields(tableName).forEach(e => {
-                    item[e] = payload[e];
-                });
-
-                let params = {
-                    TableName: tableName,
-                    Item: item
-                };
-
-                this._db.put(params, callback);
-            }
-        })
-    }
-
-    read(tableName: string, payload: any, callback: IDBCallback) {
-        let params = {
-            TableName: tableName,
-            Key: payload.key
-        };
-
-        this._db.get(params, callback);
-    }
-
-    update(tableName: string, payload: any, callback: IDBCallback) {
-        this._db.get({
-            TableName: tableName,
-            Key: payload.key
-        }, (err, res) => {
-            if (!res || !res.Item) {
-                callback(payload.key[0] + ' does not exist.');
-            } else {
-                let r = res.Item;
-                let attributes = {};
-                getFields(tableName).forEach(e => {
-                    if (payload.values[e] && r[e] !== payload.values[e]) {
-                        attributes[e] = {
-                            Action: "PUT",
-                            Value: payload.values[e]
-                        };
-                    }
-                });
-
-                let params = {
-                    TableName: tableName,
-                    Key: payload.key,
-                    AttributeUpdates: attributes
-                };
-
-                this._db.update(params, callback);
-            }
         });
 
+        if (r && r.Item) throw (readKey[k] || 'Item') + ' already exists.';
+        else {
+            let item = {};
+            getFields(tableName).forEach(e => {
+                item[e] = tryFind(payload, e, undefined);
+            });
+
+            return this._db.create({
+                TableName: tableName,
+                Item: item
+            });
+        }
     }
 
-    delete(tableName: string, payload: any, callback: IDBCallback) {
-        let params = {
+    read(tableName: string, payload: any): Promise<any> {
+        return this._db.get({
             TableName: tableName,
-            Key: payload.key
-        };
-
-        this._db.delete(params, callback);
+            Key: tryFind(payload, 'key', {})
+        });
     }
 
-    find(tableName: string, payload: any, callback: IDBCallback) {
+    async update(tableName: string, payload: any): Promise<any> {
         let params = {
             TableName: tableName,
-            FilterExpression: payload.expression,
-            ExpressionAttributeValues: payload.values
+            Key: tryFind(payload, 'key', {})
         };
 
-        this._db.scan(params, callback);
+        let r = await this._db.get(params);
+
+        if (!r || !r.Item) {
+            throw params.Key[0] + ' does not exist.';
+        } else {
+            r = r.Item;
+            let attributes = {};
+            getFields(tableName).forEach(e => {
+                let v = tryFind(payload, e, false);
+                if (v && r[e] !== v) {
+                    attributes[e] = {
+                        Action: "PUT",
+                        Value: v
+                    };
+                }
+            });
+
+            return this._db.update({
+                TableName: tableName,
+                Key: tryFind(payload, 'key', {}),
+                AttributeUpdates: attributes
+            });
+        }
+    }
+
+    delete(tableName: string, payload: any): Promise<any> {
+        return this._db.delete({
+            TableName: tableName,
+            Key: tryFind(payload, 'key', {})
+        });
+    }
+
+    find(tableName: string, payload: any): Promise<any> {
+        return this._db.find({
+            TableName: tableName,
+            FilterExpression: tryFind(payload, 'expression', undefined),
+            ExpressionAttributeValues: tryFind(payload, 'values', undefined)
+        });
     }
 }

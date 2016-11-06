@@ -4,6 +4,7 @@
     "aws-sdk": "registry:dt/aws-sdk#0.0.0+20160922141848",
     "form-data": "registry:dt/form-data#0.0.0+20160724024111",
     "node": "registry:dt/node#6.0.0+20161019125345",
-    "request": "registry:dt/request#0.0.0+20160726020908"
+    "request": "registry:dt/request#0.0.0+20160726020908",
+    "request-promise": "registry:dt/request-promise#4.1.0+20161013074249"
   }
 }

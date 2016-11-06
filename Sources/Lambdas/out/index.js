@@ -1,87 +1,94 @@
 /// <reference path="../typings/index.d.ts" />
-"use strict";
-var DynamoDBManager_1 = require('./DB/DynamoDBManager');
-var Validator_1 = require('./Validation/Validator');
-var AddressValidation_1 = require('./Validation/AddressValidation');
-var Helpers_1 = require('./Helpers/Helpers');
-var HttpCodes_1 = require('./Helpers/HttpCodes');
-var Fields_1 = require('./DB/Fields');
-function genericCallback(err, res, callback) {
-    if (err) {
-        callback(Helpers_1.genLambdaError(HttpCodes_1.HttpCodes.BadRequest, err));
-    }
-    else {
-        callback(null, res);
-    }
-}
-function checkAddress(payload, callback, onResult) {
-    AddressValidation_1.validateAddress(payload, function (err, addr) {
-        if (err) {
-            callback(Helpers_1.genLambdaError(HttpCodes_1.HttpCodes.BadRequest, err));
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
+import { DynamoDBManager } from './DB/DynamoDBManager';
+import { validate } from './Validation/Validator';
+import { requestValidAddr } from './Validation/AddressValidation';
+import { genLambdaError, tryFind } from './Helpers/Helpers';
+import { HttpCodes } from './Helpers/HttpCodes';
+import { getFieldsToCheck } from './DB/Fields';
+function tcWrapper(method, callback) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield method;
         }
-        else {
-            onResult(addr);
+        catch (err) {
+            callback(genLambdaError(HttpCodes.BadRequest, err));
         }
     });
 }
-function handler(event, context, callback) {
-    var db = new DynamoDBManager_1.DynamoDBManager();
-    var tableName = event.tableName;
+export function handler(event, context, callback) {
+    let db = new DynamoDBManager();
+    let tableName = event.tableName;
     switch (event.operation) {
         case 'create':
-            var hasError_1 = false;
-            Fields_1.getRules(tableName).forEach(function (r) {
-                // TODO: check user's address and put the barcode
-                if (!hasError_1 && !Validator_1.validate(event.payload, r)) {
-                    callback(Helpers_1.genLambdaError(HttpCodes_1.HttpCodes.BadRequest, r + ' is not valid'));
-                    hasError_1 = true;
+            let hasError = false;
+            getFieldsToCheck(tableName).forEach(r => {
+                if (!hasError && !validate(event.payload, r)) {
+                    hasError = true;
+                    callback(genLambdaError(HttpCodes.BadRequest, r + ' is not valid'));
                 }
             });
-            if (!hasError_1) {
-                if (tableName === 'addresses') {
-                    checkAddress(event.payload, callback, function (addr) { return db.create(tableName, addr, function (err, res) { return genericCallback(err, res, callback); }); });
-                }
-                else {
-                    db.create(tableName, event.payload, function (err, res) { return genericCallback(err, res, callback); });
-                }
+            if (!hasError) {
+                tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
+                    if (tableName === 'addresses')
+                        return db.create(tableName, yield requestValidAddr(event.payload));
+                    else
+                        return db.create(tableName, event.payload);
+                }), callback);
             }
             break;
         case 'read':
-            db.read(tableName, event.payload, callback);
+            tcWrapper(() => db.read(tableName, event.payload), callback);
             break;
         case 'update':
-            if (tableName === 'addresses') {
-                checkAddress(event.payload, callback, function (addr) {
-                    db.read('addresses', { key: { delivery_point_barcode: addr.delivery_point_barcode } }, function (err, res) {
-                        if (res && res.Item) {
-                        }
-                        else {
-                            db.create(tableName, addr, function (err, res) { return genericCallback(err, res, callback); });
-                        }
-                    });
-                });
-            }
-            else {
-                db.update(tableName, event.payload, function (err, res) { return genericCallback(err, res, callback); });
-            }
+            tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
+                if (tableName === 'addresses') {
+                    let addr = yield requestValidAddr(event.payload);
+                    let r = yield db.read(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    if (!r || !r.Item) {
+                        yield db.create(tableName, addr);
+                    }
+                    let email = tryFind(event.payload, 'email', undefined);
+                    r = yield db.read('customers', { key: { email: email } });
+                    if (r && r.Item) {
+                        return db.update('customers', { key: { email: email }, values: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    }
+                    else {
+                        callback(genLambdaError(HttpCodes.BadRequest, email + ' does not exist'));
+                    }
+                }
+                else {
+                    return db.update(tableName, event.payload);
+                }
+            }), callback);
             break;
         case 'delete':
-            db.delete(tableName, event.payload, callback);
+            tcWrapper(() => db.delete(tableName, event.payload), callback);
             break;
         case 'find':
-            db.find(tableName, event.payload, callback);
+            tcWrapper(() => db.find(tableName, event.payload), callback);
             break;
         case 'getaddr':
-            db.read('customers', event.payload, function (err, res) {
-                if (res) {
-                    var barcode = res.Item.delivery_point_barcode;
-                    db.read('addresses', { "key": { delivery_point_barcode: barcode } }, callback);
+            tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
+                let r = yield db.read('customers', event.payload);
+                if (r && r.Item) {
+                    let barcode = r.Item.delivery_point_barcode;
+                    return db.read('addresses', { "key": { delivery_point_barcode: barcode } });
                 }
-            });
+                else {
+                    callback(genLambdaError(HttpCodes.BadRequest, tryFind(event.payload, 'email', 'Customer') + ' does not exist'));
+                }
+            }), callback);
             break;
         default:
-            callback(Helpers_1.genLambdaError(HttpCodes_1.HttpCodes.BadRequest, "Bad Request Path"));
+            callback(genLambdaError(HttpCodes.BadRequest, "Bad Request Path"));
             break;
     }
 }
-exports.handler = handler;

@@ -3,31 +3,20 @@
 import * as lambda from 'aws-lambda';
 import * as request from 'request';
 import { IDBManager } from './Interface/IDBManager';
-import { IDBCallback } from './Interface/IDBCallback';
 import { DynamoDBManager } from './DB/DynamoDBManager';
 import { validate } from './Validation/Validator';
-import { validateAddress } from './Validation/AddressValidation';
-import { genLambdaError } from './Helpers/Helpers';
+import { requestValidAddr } from './Validation/AddressValidation';
+import { genLambdaError, tryFind } from './Helpers/Helpers';
 import { HttpCodes } from './Helpers/HttpCodes';
 import { ISmartyStreetResponse } from './Interface/ISmartyStreetResponse';
-import { getRules } from './DB/Fields';
+import { getFieldsToCheck } from './DB/Fields';
 
-function genericCallback(err: any, res: any, callback: lambda.Callback) {
-    if (err) {
+async function tcWrapper(method: () => Promise<any>, callback: lambda.Callback) {
+    try {
+        await method;
+    } catch (err) {
         callback(genLambdaError(HttpCodes.BadRequest, err));
-    } else {
-        callback(null, res);
     }
-}
-
-function checkAddress(payload: any, callback: lambda.Callback, onResult: (addr: ISmartyStreetResponse) => void) {
-    validateAddress(payload, (err, addr) => {
-        if (err) {
-            callback(genLambdaError(HttpCodes.BadRequest, err));
-        } else {
-            onResult(addr);
-        }
-    });
 }
 
 export function handler(event, context: lambda.Context, callback: lambda.Callback) {
@@ -37,60 +26,65 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
     switch (event.operation) {
         case 'create':
             let hasError = false;
-            getRules(tableName).forEach(r => {
-                // TODO: check user's address and put the barcode
+            getFieldsToCheck(tableName).forEach(r => {
                 if (!hasError && !validate(event.payload, r)) {
-                    callback(genLambdaError(HttpCodes.BadRequest, r + ' is not valid'));
                     hasError = true;
+                    callback(genLambdaError(HttpCodes.BadRequest, r + ' is not valid'));
                 }
             });
-            
+
             if (!hasError) {
-                if (tableName === 'addresses') {
-                    checkAddress(event.payload, callback, addr => db.create(tableName, addr, (err, res) => genericCallback(err, res, callback)));
-                } else {
-                    db.create(tableName, event.payload, (err, res) => genericCallback(err, res, callback));
-                }
+                tcWrapper(async () => {
+                    if (tableName === 'addresses') return db.create(tableName, await requestValidAddr(event.payload));
+                    else return db.create(tableName, event.payload);
+                }, callback);
             }
             break;
 
         case 'read':
-            db.read(tableName, event.payload, callback);
+            tcWrapper(() => db.read(tableName, event.payload), callback);
             break;
 
         case 'update':
-            if (tableName === 'addresses') {
-                checkAddress(event.payload, callback, addr => {
-                    db.read('addresses', { key: { delivery_point_barcode: addr.delivery_point_barcode } }, (err, res) => {
-                        if (res && res.Item) {
-                            // TODO: find specific user and update it
-                            // db.update('customers', {})
-                        } else {
-                            db.create(tableName, addr, (err, res) => genericCallback(err, res, callback));
-                            // TODO: find specific user and update it
-                        }
-                    });
-                });
-            } else {
-                db.update(tableName, event.payload, (err, res) => genericCallback(err, res, callback));
-            }
+            tcWrapper(async () => {
+                if (tableName === 'addresses') {
+                    let addr = await requestValidAddr(event.payload);
+                    let r = await db.read(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    if (!r || !r.Item) {
+                        await db.create(tableName, addr);
+                    }
+
+                    let email = tryFind(event.payload, 'email', undefined);
+                    r = await db.read('customers', { key: { email: email } });
+                    if (r && r.Item) {
+                        return db.update('customers', { key: { email: email }, values: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    } else {
+                        callback(genLambdaError(HttpCodes.BadRequest, email + ' does not exist'));
+                    }
+                } else {
+                    return db.update(tableName, event.payload);
+                }
+            }, callback);
             break;
 
         case 'delete':
-            db.delete(tableName, event.payload, callback);
+            tcWrapper(() => db.delete(tableName, event.payload), callback);
             break;
 
         case 'find':
-            db.find(tableName, event.payload, callback);
+            tcWrapper(() => db.find(tableName, event.payload), callback);
             break;
 
         case 'getaddr':
-            db.read('customers', event.payload, (err, res) => {
-                if (res) {
-                    let barcode = res.Item.delivery_point_barcode;
-                    db.read('addresses', { "key": { delivery_point_barcode: barcode } }, callback);
+            tcWrapper(async () => {
+                let r = await db.read('customers', event.payload);
+                if (r && r.Item) {
+                    let barcode = r.Item.delivery_point_barcode;
+                    return db.read('addresses', { "key": { delivery_point_barcode: barcode } });
+                } else {
+                    callback(genLambdaError(HttpCodes.BadRequest, tryFind(event.payload, 'email', 'Customer') + ' does not exist'));
                 }
-            });
+            }, callback);
             break;
 
         default:

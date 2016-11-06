@@ -1,87 +1,89 @@
 /// <reference path="../../typings/index.d.ts" />
-"use strict";
-var sdk = require('aws-sdk');
-var Fields_1 = require('../DB/Fields');
-var DynamoDBManager = (function () {
-    function DynamoDBManager() {
-        this._db = new sdk.DynamoDB.DocumentClient();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
+import { DynamoDBAsync } from './DynamoDBAsync';
+import { getFields } from '../DB/Fields';
+import { tryFind } from '../Helpers/Helpers';
+export class DynamoDBManager {
+    constructor() {
+        this._db = new DynamoDBAsync();
     }
-    DynamoDBManager.prototype.create = function (tableName, payload, callback) {
-        var _this = this;
-        var k = Fields_1.getFields(tableName)[0];
-        var readKey = {};
-        readKey[k] = payload[k];
-        this._db.get({
-            TableName: tableName,
-            Key: readKey
-        }, function (err, res) {
-            if (res && res.Item) {
-                callback(payload[k] + ' already exists.');
-            }
+    create(tableName, payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let k = getFields(tableName)[0];
+            let readKey = {};
+            readKey[k] = tryFind(payload, k, undefined);
+            let r = yield this._db.get({
+                TableName: tableName,
+                Key: readKey
+            });
+            if (r && r.Item)
+                throw (readKey[k] || 'Item') + ' already exists.';
             else {
-                var item_1 = {};
-                Fields_1.getFields(tableName).forEach(function (e) {
-                    item_1[e] = payload[e];
+                let item = {};
+                getFields(tableName).forEach(e => {
+                    item[e] = tryFind(payload, e, undefined);
                 });
-                var params = {
+                return this._db.create({
                     TableName: tableName,
-                    Item: item_1
-                };
-                _this._db.put(params, callback);
+                    Item: item
+                });
             }
         });
-    };
-    DynamoDBManager.prototype.read = function (tableName, payload, callback) {
-        var params = {
+    }
+    read(tableName, payload) {
+        return this._db.get({
             TableName: tableName,
-            Key: payload.key
-        };
-        this._db.get(params, callback);
-    };
-    DynamoDBManager.prototype.update = function (tableName, payload, callback) {
-        var _this = this;
-        this._db.get({
-            TableName: tableName,
-            Key: payload.key
-        }, function (err, res) {
-            if (!res || !res.Item) {
-                callback(payload.key[0] + ' does not exist.');
+            Key: tryFind(payload, 'key', {})
+        });
+    }
+    update(tableName, payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let params = {
+                TableName: tableName,
+                Key: tryFind(payload, 'key', {})
+            };
+            let r = yield this._db.get(params);
+            if (!r || !r.Item) {
+                throw params.Key[0] + ' does not exist.';
             }
             else {
-                var r_1 = res.Item;
-                var attributes_1 = {};
-                Fields_1.getFields(tableName).forEach(function (e) {
-                    if (payload.values[e] && r_1[e] !== payload.values[e]) {
-                        attributes_1[e] = {
+                r = r.Item;
+                let attributes = {};
+                getFields(tableName).forEach(e => {
+                    let v = tryFind(payload, e, false);
+                    if (v && r[e] !== v) {
+                        attributes[e] = {
                             Action: "PUT",
-                            Value: payload.values[e]
+                            Value: v
                         };
                     }
                 });
-                var params = {
+                return this._db.update({
                     TableName: tableName,
-                    Key: payload.key,
-                    AttributeUpdates: attributes_1
-                };
-                _this._db.update(params, callback);
+                    Key: tryFind(payload, 'key', {}),
+                    AttributeUpdates: attributes
+                });
             }
         });
-    };
-    DynamoDBManager.prototype.delete = function (tableName, payload, callback) {
-        var params = {
+    }
+    delete(tableName, payload) {
+        return this._db.delete({
             TableName: tableName,
-            Key: payload.key
-        };
-        this._db.delete(params, callback);
-    };
-    DynamoDBManager.prototype.find = function (tableName, payload, callback) {
-        var params = {
+            Key: tryFind(payload, 'key', {})
+        });
+    }
+    find(tableName, payload) {
+        return this._db.find({
             TableName: tableName,
-            FilterExpression: payload.expression,
-            ExpressionAttributeValues: payload.values
-        };
-        this._db.scan(params, callback);
-    };
-    return DynamoDBManager;
-}());
-exports.DynamoDBManager = DynamoDBManager;
+            FilterExpression: tryFind(payload, 'expression', undefined),
+            ExpressionAttributeValues: tryFind(payload, 'values', undefined)
+        });
+    }
+}

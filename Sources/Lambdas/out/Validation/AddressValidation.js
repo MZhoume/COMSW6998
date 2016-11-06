@@ -1,38 +1,37 @@
 /// <reference path="../../typings/index.d.ts" />
-"use strict";
-var request = require('request');
-var Helpers_1 = require('../Helpers/Helpers');
-var statics = require('../Statics');
-function validateAddress(payload, callback) {
-    var city = Helpers_1.tryFind(payload, 'city', undefined);
-    var street = Helpers_1.tryFind(payload, 'street', undefined);
-    var num = Helpers_1.tryFind(payload, 'num', undefined);
-    var zipcode = Helpers_1.tryFind(payload, 'zipcode', undefined);
-    var url = statics.SmartyStreetUrl + statics.SS_StreetPrefix + encodeURIComponent(street + ' ' + num)
-        + statics.SS_CityPrefix + encodeURIComponent(city)
-        + statics.SS_ZipCodePrefix + encodeURIComponent(zipcode);
-    request.get(url, function (err, res, body) {
-        if (res.statusCode === 200) {
-            var suggestions = JSON.parse(body);
-            if (suggestions.length == 0) {
-                callback("Invalid Address");
-            }
-            else {
-                var sug = suggestions[0];
-                console.log('SS response: ' + sug);
-                var addr = {
-                    delivery_point_barcode: sug.delivery_point_barcode,
-                    city: (sug.components.city_name || ''),
-                    street: (sug.components.primary_number || '') + ' ' + (sug.components.street_predirection || '') + ' ' + (sug.components.street_name || '') + ' ' + (sug.components.street_postdirection || '') + ' ' + (sug.components.street_suffix || ''),
-                    num: (sug.components.secondary_designator || '') + ' ' + (sug.components.secondary_number || ''),
-                    zipcode: (sug.components.zipcode || '')
-                };
-                callback(null, addr);
-            }
-        }
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
+import * as request from 'request-promise';
+import { tryFind } from '../Helpers/Helpers';
+import * as statics from '../Statics';
+export function requestValidAddr(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let city = tryFind(payload, 'city', undefined);
+        let street = tryFind(payload, 'street', undefined);
+        let num = tryFind(payload, 'num', undefined);
+        let zipcode = tryFind(payload, 'zipcode', undefined);
+        let url = statics.SmartyStreetUrl + statics.SS_StreetPrefix + encodeURIComponent(street + ' ' + num)
+            + statics.SS_CityPrefix + encodeURIComponent(city)
+            + statics.SS_ZipCodePrefix + encodeURIComponent(zipcode);
+        let r = yield request.get(url);
+        let suggestions = JSON.parse(r);
+        if (suggestions.length == 0)
+            throw "Invalid Address";
         else {
-            callback(body);
+            let sug = suggestions[0];
+            return {
+                delivery_point_barcode: sug.delivery_point_barcode,
+                city: (sug.components.city_name || ''),
+                street: (sug.components.primary_number || '') + ' ' + (sug.components.street_predirection || '') + ' ' + (sug.components.street_name || '') + ' ' + (sug.components.street_postdirection || '') + ' ' + (sug.components.street_suffix || ''),
+                num: (sug.components.secondary_designator || '') + ' ' + (sug.components.secondary_number || ''),
+                zipcode: (sug.components.zipcode || '')
+            };
         }
     });
 }
-exports.validateAddress = validateAddress;
