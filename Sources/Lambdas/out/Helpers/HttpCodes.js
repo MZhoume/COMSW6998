@@ -1,4 +1,4 @@
-export var HttpCodes;
+"use strict";
 (function (HttpCodes) {
     HttpCodes[HttpCodes["Continue"] = 100] = "Continue";
     HttpCodes[HttpCodes["SwitchingProtocols"] = 101] = "SwitchingProtocols";
@@ -31,4 +31,5 @@ export var HttpCodes;
     HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
     HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
     HttpCodes[HttpCodes["HTTPVersionNotSupported"] = 505] = "HTTPVersionNotSupported";
-})(HttpCodes || (HttpCodes = {}));
+})(exports.HttpCodes || (exports.HttpCodes = {}));
+var HttpCodes = exports.HttpCodes;

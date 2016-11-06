@@ -1,4 +1,5 @@
-export function tryFind(payload, key, def) {
+"use strict";
+function tryFind(payload, key, def) {
     if (payload) {
         if (payload[key]) {
             return payload[key];
@@ -12,6 +13,8 @@ export function tryFind(payload, key, def) {
     }
     return def;
 }
-export function genLambdaError(code, message) {
+exports.tryFind = tryFind;
+function genLambdaError(code, message) {
     return new Error(JSON.stringify({ code: code, message: message }));
 }
+exports.genLambdaError = genLambdaError;

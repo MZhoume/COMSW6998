@@ -13,7 +13,7 @@ import { getFieldsToCheck } from './DB/Fields';
 
 async function tcWrapper(method: () => Promise<any>, callback: lambda.Callback) {
     try {
-        await method;
+        callback(null, await method());
     } catch (err) {
         callback(genLambdaError(HttpCodes.BadRequest, err));
     }

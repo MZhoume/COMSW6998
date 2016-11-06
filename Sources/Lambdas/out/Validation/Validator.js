@@ -1,5 +1,6 @@
 /// <reference path="../../typings/index.d.ts" />
-import { tryFind } from '../Helpers/Helpers';
+"use strict";
+const Helpers_1 = require('../Helpers/Helpers');
 var Validator = {
     email: (email) => {
         // TODO: add comment about this regex
@@ -12,7 +13,8 @@ var Validator = {
         return regex.test(zipcode);
     }
 };
-export function validate(payload, fieldName) {
-    let data = tryFind(payload, fieldName, undefined);
+function validate(payload, fieldName) {
+    let data = Helpers_1.tryFind(payload, fieldName, undefined);
     return data && Validator[fieldName](data);
 }
+exports.validate = validate;

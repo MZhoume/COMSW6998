@@ -1,4 +1,5 @@
 /// <reference path="../../typings/index.d.ts" />
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7,15 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-import * as request from 'request-promise';
-import { tryFind } from '../Helpers/Helpers';
-import * as statics from '../Statics';
-export function requestValidAddr(payload) {
+const request = require('request-promise');
+const Helpers_1 = require('../Helpers/Helpers');
+const statics = require('../Statics');
+function requestValidAddr(payload) {
     return __awaiter(this, void 0, void 0, function* () {
-        let city = tryFind(payload, 'city', undefined);
-        let street = tryFind(payload, 'street', undefined);
-        let num = tryFind(payload, 'num', undefined);
-        let zipcode = tryFind(payload, 'zipcode', undefined);
+        let city = Helpers_1.tryFind(payload, 'city', undefined);
+        let street = Helpers_1.tryFind(payload, 'street', undefined);
+        let num = Helpers_1.tryFind(payload, 'num', undefined);
+        let zipcode = Helpers_1.tryFind(payload, 'zipcode', undefined);
         let url = statics.SmartyStreetUrl + statics.SS_StreetPrefix + encodeURIComponent(street + ' ' + num)
             + statics.SS_CityPrefix + encodeURIComponent(city)
             + statics.SS_ZipCodePrefix + encodeURIComponent(zipcode);
@@ -35,3 +36,4 @@ export function requestValidAddr(payload) {
         }
     });
 }
+exports.requestValidAddr = requestValidAddr;

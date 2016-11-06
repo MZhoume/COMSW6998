@@ -8,7 +8,7 @@ let params = {
     name: 'comsLambda',
     role: 'arn:aws:iam::722850008576:role/lambda-gateway-execution-role-test'
 };
- 
+
 let options = {
     profile: 'default',
     region: 'us-east-1'
@@ -22,31 +22,32 @@ var paths = {
 
 gulp.task('default', ['build']);
 
-gulp.task('build', function () {
+gulp.task('clean', function () {
+    return del(paths.out);
+});
+
+gulp.task('build', ['clean'], function () {
     return gulp.src(paths.src)
         .pipe(typescript({
-            target: 'ES6'
+            target: 'ES6',
+            module: 'CommonJS'
         }))
         .js
         .pipe(gulp.dest('./out/'));
 });
 
-gulp.task('clean', function () {
-    return del(paths.out);
-});
-
-gulp.task('zip', function () {
+gulp.task('zip', ['build'], function () {
     return gulp.src(paths.zip)
         .pipe(zip('lambda.zip'))
         .pipe(gulp.dest('./'));
 });
- 
-gulp.task('upload', function() {
+
+gulp.task('upload', ['zip'], function () {
     return gulp.src('./lambda.zip')
         .pipe(lambda(params, options));
 });
 
-gulp.task('deploy', ['clean', 'build', 'zip', 'upload'], function() {});
+gulp.task('deploy', ['upload'], function () {});
 
 gulp.task('watch', function () {
     gulp.watch(paths.src, ['build']);

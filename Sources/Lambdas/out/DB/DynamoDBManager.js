@@ -1,4 +1,5 @@
 /// <reference path="../../typings/index.d.ts" />
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7,18 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-import { DynamoDBAsync } from './DynamoDBAsync';
-import { getFields } from '../DB/Fields';
-import { tryFind } from '../Helpers/Helpers';
-export class DynamoDBManager {
+const DynamoDBAsync_1 = require('./DynamoDBAsync');
+const Fields_1 = require('../DB/Fields');
+const Helpers_1 = require('../Helpers/Helpers');
+class DynamoDBManager {
     constructor() {
-        this._db = new DynamoDBAsync();
+        this._db = new DynamoDBAsync_1.DynamoDBAsync();
     }
     create(tableName, payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            let k = getFields(tableName)[0];
+            let k = Fields_1.getFields(tableName)[0];
             let readKey = {};
-            readKey[k] = tryFind(payload, k, undefined);
+            readKey[k] = Helpers_1.tryFind(payload, k, undefined);
             let r = yield this._db.get({
                 TableName: tableName,
                 Key: readKey
@@ -27,8 +28,8 @@ export class DynamoDBManager {
                 throw (readKey[k] || 'Item') + ' already exists.';
             else {
                 let item = {};
-                getFields(tableName).forEach(e => {
-                    item[e] = tryFind(payload, e, undefined);
+                Fields_1.getFields(tableName).forEach(e => {
+                    item[e] = Helpers_1.tryFind(payload, e, undefined);
                 });
                 return this._db.create({
                     TableName: tableName,
@@ -40,14 +41,14 @@ export class DynamoDBManager {
     read(tableName, payload) {
         return this._db.get({
             TableName: tableName,
-            Key: tryFind(payload, 'key', {})
+            Key: Helpers_1.tryFind(payload, 'key', {})
         });
     }
     update(tableName, payload) {
         return __awaiter(this, void 0, void 0, function* () {
             let params = {
                 TableName: tableName,
-                Key: tryFind(payload, 'key', {})
+                Key: Helpers_1.tryFind(payload, 'key', {})
             };
             let r = yield this._db.get(params);
             if (!r || !r.Item) {
@@ -56,8 +57,8 @@ export class DynamoDBManager {
             else {
                 r = r.Item;
                 let attributes = {};
-                getFields(tableName).forEach(e => {
-                    let v = tryFind(payload, e, false);
+                Fields_1.getFields(tableName).forEach(e => {
+                    let v = Helpers_1.tryFind(payload, e, false);
                     if (v && r[e] !== v) {
                         attributes[e] = {
                             Action: "PUT",
@@ -67,7 +68,7 @@ export class DynamoDBManager {
                 });
                 return this._db.update({
                     TableName: tableName,
-                    Key: tryFind(payload, 'key', {}),
+                    Key: Helpers_1.tryFind(payload, 'key', {}),
                     AttributeUpdates: attributes
                 });
             }
@@ -76,14 +77,15 @@ export class DynamoDBManager {
     delete(tableName, payload) {
         return this._db.delete({
             TableName: tableName,
-            Key: tryFind(payload, 'key', {})
+            Key: Helpers_1.tryFind(payload, 'key', {})
         });
     }
     find(tableName, payload) {
         return this._db.find({
             TableName: tableName,
-            FilterExpression: tryFind(payload, 'expression', undefined),
-            ExpressionAttributeValues: tryFind(payload, 'values', undefined)
+            FilterExpression: Helpers_1.tryFind(payload, 'expression', undefined),
+            ExpressionAttributeValues: Helpers_1.tryFind(payload, 'values', undefined)
         });
     }
 }
+exports.DynamoDBManager = DynamoDBManager;
