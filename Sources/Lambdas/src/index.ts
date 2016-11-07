@@ -20,7 +20,7 @@ function tcWrapper(method: () => void, callback: lambda.Callback) {
 }
 
 export function handler(event, context: lambda.Context, callback: lambda.Callback) {
-    let db: IDBManager = new DynamoDBManager();
+    let dbManager: IDBManager = new DynamoDBManager();
     let tableName = event.tableName;
 
     switch (event.operation) {
@@ -33,52 +33,52 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
                 }
             }
 
-            tcWrapper(async () => callback(undefined, await db.create(tableName,
+            tcWrapper(async () => callback(undefined, await dbManager.create(tableName,
                 tableName === addressesTableName ? await requestValidAddr(event.payload) : event.payload)),
                 callback);
             break;
 
         case 'read':
-            tcWrapper(async () => callback(undefined, await db.get(tableName, event.payload)), callback);
+            tcWrapper(async () => callback(undefined, await dbManager.get(tableName, event.payload)), callback);
             break;
 
         case 'update':
             if (tableName === addressesTableName) {
                 tcWrapper(async () => {
                     let addr = await requestValidAddr(event.payload);
-                    let r = await db.get(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    let r = await dbManager.get(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
                     if (!r || !r.Item) {
-                        await db.create(tableName, addr);
+                        await dbManager.create(tableName, addr);
                     }
 
                     let email = tryFind(event.payload, 'email', undefined);
-                    r = await db.get(customersTableName, { key: { email: email } });
+                    r = await dbManager.get(customersTableName, { key: { email: email } });
                     if (r && r.Item) {
-                        callback(undefined, await db.update(customersTableName,
+                        callback(undefined, await dbManager.update(customersTableName,
                             { key: { email: email }, values: { delivery_point_barcode: addr.delivery_point_barcode } }));
                     } else {
                         callback(genLambdaError(HttpCodes.BadRequest, `${email} does not exist`));
                     }
                 }, callback);
             } else {
-                tcWrapper(async () => callback(undefined, await db.update(tableName, event.payload)), callback);
+                tcWrapper(async () => callback(undefined, await dbManager.update(tableName, event.payload)), callback);
             }
             break;
 
         case 'delete':
-            tcWrapper(async () => callback(undefined, await db.delete(tableName, event.payload)), callback);
+            tcWrapper(async () => callback(undefined, await dbManager.delete(tableName, event.payload)), callback);
             break;
 
         case 'find':
-            tcWrapper(async () => callback(undefined, await db.find(tableName, event.payload)), callback);
+            tcWrapper(async () => callback(undefined, await dbManager.find(tableName, event.payload)), callback);
             break;
 
         case 'getaddr':
             tcWrapper(async () => {
-                let r = await db.get(customersTableName, event.payload);
+                let r = await dbManager.get(customersTableName, event.payload);
                 if (r && r.Item) {
                     let barcode = r.Item.delivery_point_barcode;
-                    callback(undefined, await db.get(addressesTableName, { "key": { delivery_point_barcode: barcode } }));
+                    callback(undefined, await dbManager.get(addressesTableName, { "key": { delivery_point_barcode: barcode } }));
                 } else {
                     callback(genLambdaError(HttpCodes.BadRequest, `${tryFind(event.payload, 'email', 'Customer')} does not exist`));
                 }
