@@ -38,20 +38,20 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
             break;
 
         case 'read':
-            tcWrapper(async () => callback(undefined, await db.read(tableName, event.payload)), callback);
+            tcWrapper(async () => callback(undefined, await db.get(tableName, event.payload)), callback);
             break;
 
         case 'update':
             if (tableName === addressesTableName) {
                 tcWrapper(async () => {
                     let addr = await requestValidAddr(event.payload);
-                    let r = await db.read(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    let r = await db.get(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
                     if (!r || !r.Item) {
                         await db.create(tableName, addr);
                     }
 
                     let email = tryFind(event.payload, 'email', undefined);
-                    r = await db.read(customersTableName, { key: { email: email } });
+                    r = await db.get(customersTableName, { key: { email: email } });
                     if (r && r.Item) {
                         callback(undefined, await db.update(customersTableName,
                             { key: { email: email }, values: { delivery_point_barcode: addr.delivery_point_barcode } }));
@@ -74,10 +74,10 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
 
         case 'getaddr':
             tcWrapper(async () => {
-                let r = await db.read(customersTableName, event.payload);
+                let r = await db.get(customersTableName, event.payload);
                 if (r && r.Item) {
                     let barcode = r.Item.delivery_point_barcode;
-                    callback(undefined, await db.read(addressesTableName, { "key": { delivery_point_barcode: barcode } }));
+                    callback(undefined, await db.get(addressesTableName, { "key": { delivery_point_barcode: barcode } }));
                 } else {
                     callback(genLambdaError(HttpCodes.BadRequest, `${tryFind(event.payload, 'email', 'Customer')} does not exist`));
                 }

@@ -11,6 +11,8 @@ export class DynamoDBManager implements IDBManager {
         this._db = new DynamoDBAsync();
     }
 
+    // TODO: keep create and get consistent, either check for protential errors or not at all
+
     async create(tableName: string, payload: any): Promise<any> {
         let k = getFields(tableName)[0];
         let readKey = {};
@@ -34,7 +36,7 @@ export class DynamoDBManager implements IDBManager {
         }
     }
 
-    read(tableName: string, payload: any): Promise<any> {
+    get(tableName: string, payload: any): Promise<any> {
         return this._db.get({
             TableName: tableName,
             Key: tryFind(payload, 'key', {})
