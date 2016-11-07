@@ -15,6 +15,7 @@ class DynamoDBManager {
     constructor() {
         this._db = new DynamoDBAsync_1.DynamoDBAsync();
     }
+    // TODO: keep create and get consistent, either check for protential errors or not at all
     create(tableName, payload) {
         return __awaiter(this, void 0, void 0, function* () {
             let k = Fields_1.getFields(tableName)[0];
@@ -37,7 +38,7 @@ class DynamoDBManager {
             }
         });
     }
-    read(tableName, payload) {
+    get(tableName, payload) {
         return this._db.get({
             TableName: tableName,
             Key: Helpers_1.tryFind(payload, 'key', {})

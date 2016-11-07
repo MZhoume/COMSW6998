@@ -24,6 +24,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
     let tableName = event.tableName;
 
     switch (event.operation) {
+        // TODO: where to check the errors, here or dbmanager?
         case 'create':
             for (let r of getFieldsToCheck(tableName)) {
                 if (!validate(event.payload, r)) {

@@ -26,6 +26,7 @@ function handler(event, context, callback) {
     let db = new DynamoDBManager_1.DynamoDBManager();
     let tableName = event.tableName;
     switch (event.operation) {
+        // TODO: where to check the errors, here or dbmanager?
         case 'create':
             for (let r of Fields_1.getFieldsToCheck(tableName)) {
                 if (!Validator_1.validate(event.payload, r)) {
@@ -36,18 +37,18 @@ function handler(event, context, callback) {
             tcWrapper(() => __awaiter(this, void 0, void 0, function* () { return callback(undefined, yield db.create(tableName, tableName === Fields_1.addressesTableName ? yield AddressValidation_1.requestValidAddr(event.payload) : event.payload)); }), callback);
             break;
         case 'read':
-            tcWrapper(() => __awaiter(this, void 0, void 0, function* () { return callback(undefined, yield db.read(tableName, event.payload)); }), callback);
+            tcWrapper(() => __awaiter(this, void 0, void 0, function* () { return callback(undefined, yield db.get(tableName, event.payload)); }), callback);
             break;
         case 'update':
             if (tableName === Fields_1.addressesTableName) {
                 tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
                     let addr = yield AddressValidation_1.requestValidAddr(event.payload);
-                    let r = yield db.read(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    let r = yield db.get(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
                     if (!r || !r.Item) {
                         yield db.create(tableName, addr);
                     }
                     let email = Helpers_1.tryFind(event.payload, 'email', undefined);
-                    r = yield db.read(Fields_1.customersTableName, { key: { email: email } });
+                    r = yield db.get(Fields_1.customersTableName, { key: { email: email } });
                     if (r && r.Item) {
                         callback(undefined, yield db.update(Fields_1.customersTableName, { key: { email: email }, values: { delivery_point_barcode: addr.delivery_point_barcode } }));
                     }
@@ -68,10 +69,10 @@ function handler(event, context, callback) {
             break;
         case 'getaddr':
             tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
-                let r = yield db.read(Fields_1.customersTableName, event.payload);
+                let r = yield db.get(Fields_1.customersTableName, event.payload);
                 if (r && r.Item) {
                     let barcode = r.Item.delivery_point_barcode;
-                    callback(undefined, yield db.read(Fields_1.addressesTableName, { "key": { delivery_point_barcode: barcode } }));
+                    callback(undefined, yield db.get(Fields_1.addressesTableName, { "key": { delivery_point_barcode: barcode } }));
                 }
                 else {
                     callback(Helpers_1.genLambdaError(HttpCodes_1.HttpCodes.BadRequest, `${Helpers_1.tryFind(event.payload, 'email', 'Customer')} does not exist`));
