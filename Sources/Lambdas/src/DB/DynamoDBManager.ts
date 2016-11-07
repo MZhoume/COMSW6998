@@ -6,8 +6,7 @@ import { IDBManager } from '../Interface/IDBManager';
 import { tryFind } from '../Helpers/Helpers';
 
 export class DynamoDBManager implements IDBManager {
-    _db: DynamoDBAsync;
-
+    _db: DynamoDBAsync
     constructor() {
         this._db = new DynamoDBAsync();
     }
@@ -22,12 +21,11 @@ export class DynamoDBManager implements IDBManager {
             Key: readKey
         });
 
-        if (r && r.Item) throw (readKey[k] || 'Item') + ' already exists.';
+        if (r && r.Item) throw `${readKey[k] || 'Item'} already exists.`;
         else {
             let item = {};
-            getFields(tableName).forEach(e => {
+            for (let e of getFields(tableName))
                 item[e] = tryFind(payload, e, undefined);
-            });
 
             return this._db.create({
                 TableName: tableName,
@@ -52,11 +50,11 @@ export class DynamoDBManager implements IDBManager {
         let r = await this._db.get(params);
 
         if (!r || !r.Item) {
-            throw params.Key[0] + ' does not exist.';
+            throw `${params.Key[0] || 'Item'} does not exist.`;
         } else {
             r = r.Item;
             let attributes = {};
-            getFields(tableName).forEach(e => {
+            for (let e of getFields(tableName)) {
                 let v = tryFind(payload, e, false);
                 if (v && r[e] !== v) {
                     attributes[e] = {
@@ -64,7 +62,7 @@ export class DynamoDBManager implements IDBManager {
                         Value: v
                     };
                 }
-            });
+            }
 
             return this._db.update({
                 TableName: tableName,

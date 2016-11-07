@@ -25,12 +25,11 @@ class DynamoDBManager {
                 Key: readKey
             });
             if (r && r.Item)
-                throw (readKey[k] || 'Item') + ' already exists.';
+                throw `${readKey[k] || 'Item'} already exists.`;
             else {
                 let item = {};
-                Fields_1.getFields(tableName).forEach(e => {
+                for (let e of Fields_1.getFields(tableName))
                     item[e] = Helpers_1.tryFind(payload, e, undefined);
-                });
                 return this._db.create({
                     TableName: tableName,
                     Item: item
@@ -52,12 +51,12 @@ class DynamoDBManager {
             };
             let r = yield this._db.get(params);
             if (!r || !r.Item) {
-                throw params.Key[0] + ' does not exist.';
+                throw `${params.Key[0] || 'Item'} does not exist.`;
             }
             else {
                 r = r.Item;
                 let attributes = {};
-                Fields_1.getFields(tableName).forEach(e => {
+                for (let e of Fields_1.getFields(tableName)) {
                     let v = Helpers_1.tryFind(payload, e, false);
                     if (v && r[e] !== v) {
                         attributes[e] = {
@@ -65,7 +64,7 @@ class DynamoDBManager {
                             Value: v
                         };
                     }
-                });
+                }
                 return this._db.update({
                     TableName: tableName,
                     Key: Helpers_1.tryFind(payload, 'key', {}),

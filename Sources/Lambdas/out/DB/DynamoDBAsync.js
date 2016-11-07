@@ -1,49 +1,32 @@
 /// <reference path="../../typings/index.d.ts" />
 "use strict";
 const aws_sdk_1 = require('aws-sdk');
-// function composePromise(method: (params: any, callback: (err, res) => void) => void, params: any): Promise<any> {
-//     return new Promise<any>((resolve, reject) =>
-//         method(params, (err, res) => {
-//             if (err) reject(err);
-//             else resolve(res);
-//         })
-//     );
-// }
-// TODO: REFACTOR!!!
-function promiseCallback(err, res, resolve, reject) {
-    if (err)
-        reject(err);
-    else
-        resolve(res);
+function composePromise(method, params) {
+    return new Promise((resolve, reject) => method(params, (err, res) => {
+        if (err)
+            reject(err);
+        else
+            resolve(res);
+    }));
 }
 class DynamoDBAsync {
     constructor() {
         this._db = new aws_sdk_1.DynamoDB.DocumentClient();
     }
     create(params) {
-        return new Promise((res, rej) => {
-            this._db.put(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.put.bind(this._db), params);
     }
     get(params) {
-        return new Promise((res, rej) => {
-            this._db.get(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.get.bind(this._db), params);
     }
     update(params) {
-        return new Promise((res, rej) => {
-            this._db.update(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.update.bind(this._db), params);
     }
     delete(params) {
-        return new Promise((res, rej) => {
-            this._db.delete(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.delete.bind(this._db), params);
     }
     find(params) {
-        return new Promise((res, rej) => {
-            this._db.scan(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.scan.bind(this._db), params);
     }
 }
 exports.DynamoDBAsync = DynamoDBAsync;

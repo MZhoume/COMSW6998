@@ -2,55 +2,38 @@
 
 import { DynamoDB } from 'aws-sdk';
 
-// function composePromise(method: (params: any, callback: (err, res) => void) => void, params: any): Promise<any> {
-//     return new Promise<any>((resolve, reject) =>
-//         method(params, (err, res) => {
-//             if (err) reject(err);
-//             else resolve(res);
-//         })
-//     );
-// }
-
-// TODO: REFACTOR!!!
-function promiseCallback(err: any, res: any, resolve: (data: any) => void, reject: (data: any) => void) {
-    if (err) reject(err);
-    else resolve(res);
+function composePromise(method: (params: any, callback: (err, res) => void) => void, params: any): Promise<any> {
+    return new Promise<any>((resolve, reject) =>
+        method(params, (err, res) => {
+            if (err) reject(err);
+            else resolve(res);
+        })
+    );
 }
 
 export class DynamoDBAsync {
     _db: DynamoDB.DocumentClient;
-
     constructor() {
         this._db = new DynamoDB.DocumentClient();
     }
 
     create(params: any): Promise<any> {
-        return new Promise<any>((res, rej) => {
-            this._db.put(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.put.bind(this._db), params);
     }
 
     get(params: any): Promise<any> {
-        return new Promise<any>((res, rej) => {
-            this._db.get(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.get.bind(this._db), params);
     }
 
     update(params: any): Promise<any> {
-        return new Promise<any>((res, rej) => {
-            this._db.update(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.update.bind(this._db), params);
     }
 
     delete(params: any): Promise<any> {
-        return new Promise<any>((res, rej) => {
-            this._db.delete(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.delete.bind(this._db), params);
     }
 
     find(params: any): Promise<any> {
-        return new Promise<any>((res, rej) => {
-            this._db.scan(params, (err, dat) => promiseCallback(err, dat, res, rej));
-        });
+        return composePromise(this._db.scan.bind(this._db), params);
     }
 }
