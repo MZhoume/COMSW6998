@@ -22,8 +22,10 @@ function requestValidAddr(payload) {
             + statics.SS_ZipCodePrefix + encodeURIComponent(zipcode);
         let r = yield request.get(url);
         let suggestions = JSON.parse(r);
-        if (suggestions.length == 0)
-            throw 'Invalid Address';
+        if (suggestions.length === 0)
+            throw 'Invalid Address.';
+        else if (suggestions.length > 1)
+            throw `Incomplete Address.`;
         else {
             let sug = suggestions[0];
             return {

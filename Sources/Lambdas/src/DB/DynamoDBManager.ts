@@ -6,75 +6,65 @@ import { IDBManager } from '../Interface/IDBManager';
 import { tryFind } from '../Helpers/Helpers';
 
 export class DynamoDBManager implements IDBManager {
-    _db: DynamoDBAsync
-    constructor() {
-        this._db = new DynamoDBAsync();
-    }
-
-    // TODO: keep create and get consistent, either check for protential errors or not at all
+    _db: DynamoDBAsync = new DynamoDBAsync();
 
     async create(tableName: string, payload: any): Promise<any> {
         let k = getFields(tableName)[0];
-        let readKey = {};
-        readKey[k] = tryFind(payload, k, undefined);
+        let v = tryFind(payload, k, undefined);
+        if (!v) throw `${k} does not exist in request.`;
 
+        let key = {};
+        key[k] = v;
         let r = await this._db.get({
             TableName: tableName,
-            Key: readKey
+            Key: key
         });
+        if (r && r.Item) throw `${v} already exists.`;
 
-        if (r && r.Item) throw `${readKey[k] || 'Item'} already exists.`;
-        else {
-            let item = {};
-            for (let e of getFields(tableName))
-                item[e] = tryFind(payload, e, undefined);
+        let item = {};
+        for (let e of getFields(tableName))
+            item[e] = tryFind(payload, e, undefined);
 
-            return this._db.create({
-                TableName: tableName,
-                Item: item
-            });
-        }
+        return this._db.create({
+            TableName: tableName,
+            Item: item
+        });
     }
 
-    get(tableName: string, payload: any): Promise<any> {
-        return this._db.get({
+    async get(tableName: string, payload: any): Promise<any> {
+        let key = tryFind(payload, 'key', {});
+        let r = await this._db.get({
             TableName: tableName,
-            Key: tryFind(payload, 'key', {})
+            Key: key
         });
+        if (!r || !r.Item) throw `${key[Object.keys(key)[0]] || 'Item'} does not exists.`;
+        return r.Item;
     }
 
     async update(tableName: string, payload: any): Promise<any> {
-        let params = {
-            TableName: tableName,
-            Key: tryFind(payload, 'key', {})
-        };
+        let r = await this.get(tableName, payload);
 
-        let r = await this._db.get(params);
-
-        if (!r || !r.Item) {
-            throw `${params.Key[0] || 'Item'} does not exist.`;
-        } else {
-            r = r.Item;
-            let attributes = {};
-            for (let e of getFields(tableName)) {
-                let v = tryFind(payload, e, false);
-                if (v && r[e] !== v) {
-                    attributes[e] = {
-                        Action: "PUT",
-                        Value: v
-                    };
-                }
+        let attributes = {};
+        for (let e of getFields(tableName)) {
+            let v = tryFind(payload, e, undefined);
+            if (v && r[e] !== v) {
+                attributes[e] = {
+                    Action: "PUT",
+                    Value: v
+                };
             }
-
-            return this._db.update({
-                TableName: tableName,
-                Key: tryFind(payload, 'key', {}),
-                AttributeUpdates: attributes
-            });
         }
+
+        return this._db.update({
+            TableName: tableName,
+            Key: tryFind(payload, 'key', {}),
+            AttributeUpdates: attributes
+        });
     }
 
-    delete(tableName: string, payload: any): Promise<any> {
+    async delete(tableName: string, payload: any): Promise<any> {
+        await this.get(tableName, payload);
+
         return this._db.delete({
             TableName: tableName,
             Key: tryFind(payload, 'key', {})

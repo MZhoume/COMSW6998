@@ -15,69 +15,68 @@ class DynamoDBManager {
     constructor() {
         this._db = new DynamoDBAsync_1.DynamoDBAsync();
     }
-    // TODO: keep create and get consistent, either check for protential errors or not at all
     create(tableName, payload) {
         return __awaiter(this, void 0, void 0, function* () {
             let k = Fields_1.getFields(tableName)[0];
-            let readKey = {};
-            readKey[k] = Helpers_1.tryFind(payload, k, undefined);
+            let v = Helpers_1.tryFind(payload, k, undefined);
+            if (!v)
+                throw `${k} does not exist in request.`;
+            let key = {};
+            key[k] = v;
             let r = yield this._db.get({
                 TableName: tableName,
-                Key: readKey
+                Key: key
             });
             if (r && r.Item)
-                throw `${readKey[k] || 'Item'} already exists.`;
-            else {
-                let item = {};
-                for (let e of Fields_1.getFields(tableName))
-                    item[e] = Helpers_1.tryFind(payload, e, undefined);
-                return this._db.create({
-                    TableName: tableName,
-                    Item: item
-                });
-            }
+                throw `${v} already exists.`;
+            let item = {};
+            for (let e of Fields_1.getFields(tableName))
+                item[e] = Helpers_1.tryFind(payload, e, undefined);
+            return this._db.create({
+                TableName: tableName,
+                Item: item
+            });
         });
     }
     get(tableName, payload) {
-        return this._db.get({
-            TableName: tableName,
-            Key: Helpers_1.tryFind(payload, 'key', {})
+        return __awaiter(this, void 0, void 0, function* () {
+            let key = Helpers_1.tryFind(payload, 'key', {});
+            let r = yield this._db.get({
+                TableName: tableName,
+                Key: key
+            });
+            if (!r || !r.Item)
+                throw `${key[Object.keys(key)[0]] || 'Item'} does not exists.`;
+            return r.Item;
         });
     }
     update(tableName, payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            let params = {
-                TableName: tableName,
-                Key: Helpers_1.tryFind(payload, 'key', {})
-            };
-            let r = yield this._db.get(params);
-            if (!r || !r.Item) {
-                throw `${params.Key[0] || 'Item'} does not exist.`;
-            }
-            else {
-                r = r.Item;
-                let attributes = {};
-                for (let e of Fields_1.getFields(tableName)) {
-                    let v = Helpers_1.tryFind(payload, e, false);
-                    if (v && r[e] !== v) {
-                        attributes[e] = {
-                            Action: "PUT",
-                            Value: v
-                        };
-                    }
+            let r = yield this.get(tableName, payload);
+            let attributes = {};
+            for (let e of Fields_1.getFields(tableName)) {
+                let v = Helpers_1.tryFind(payload, e, undefined);
+                if (v && r[e] !== v) {
+                    attributes[e] = {
+                        Action: "PUT",
+                        Value: v
+                    };
                 }
-                return this._db.update({
-                    TableName: tableName,
-                    Key: Helpers_1.tryFind(payload, 'key', {}),
-                    AttributeUpdates: attributes
-                });
             }
+            return this._db.update({
+                TableName: tableName,
+                Key: Helpers_1.tryFind(payload, 'key', {}),
+                AttributeUpdates: attributes
+            });
         });
     }
     delete(tableName, payload) {
-        return this._db.delete({
-            TableName: tableName,
-            Key: Helpers_1.tryFind(payload, 'key', {})
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.get(tableName, payload);
+            return this._db.delete({
+                TableName: tableName,
+                Key: Helpers_1.tryFind(payload, 'key', {})
+            });
         });
     }
     find(tableName, payload) {

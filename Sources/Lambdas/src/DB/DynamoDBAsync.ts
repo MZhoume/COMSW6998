@@ -12,10 +12,7 @@ function composePromise(method: (params: any, callback: (err, res) => void) => v
 }
 
 export class DynamoDBAsync {
-    _db: DynamoDB.DocumentClient;
-    constructor() {
-        this._db = new DynamoDB.DocumentClient();
-    }
+    _db: DynamoDB.DocumentClient = new DynamoDB.DocumentClient();
 
     create(params: any): Promise<any> {
         return composePromise(this._db.put.bind(this._db), params);
