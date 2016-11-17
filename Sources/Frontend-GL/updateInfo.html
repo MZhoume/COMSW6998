@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Create Customer | Typer's Project</title>
+    <title>Update Info | Typer's Project</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="description" content="The project of Typer" />
@@ -124,8 +124,6 @@
                 var zipcodeVal = $("input[name='zipcode']").val();
                 var countryVal = $("input[name='country']").val();
 
-                if(!checkEmail(emailVal)) return;
-
                 $.post(customerUrl, {item: {
                     "email" : emailVal,
                     "firstname" : firstnameVal,
@@ -164,15 +162,12 @@
                     if(data.item != "") {
                         $("#email-invalid-err").hide();
                         $("#email-dup-err").show();
-                        return false;
                     }
-                    return true;
                 });
             }
             else {
                 $("#email-dup-err").hide();
                 $("#email-invalid-err").show();
-                return false;
             }
         };
 		</script>
@@ -217,7 +212,7 @@
         //var street = place.address_components[0][componentForm["street_number"]] + " " + place.address_components[1][componentForm["route"]];
         //document.getElementById("street").value = street;
 
-        for (var i = 0; i < place.address_components.length; i++) {
+        for (var i =0; i < place.address_components.length; i++) {
           var addressType = place.address_components[i].types[0];
           if (componentForm[addressType]) {
             var val = place.address_components[i][componentForm[addressType]];
@@ -244,7 +239,7 @@
         }
       }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFZE7t7SgFOm4vPhOpxogH8Cyvy-ge2SY&libraries=places&callback=initAutocomplete"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAg75Msn1aeyd1-vIk8Jg2QK3r8JZi4iPA&libraries=places&callback=initAutocomplete"
         async defer></script>
   </body>
 </html>

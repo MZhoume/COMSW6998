@@ -9,6 +9,7 @@
         <link rel="stylesheet" type="text/css" href="./semantic/dist/semantic.min.css">
         <script src="./semantic/dist/semantic.min.js"></script>
 		<script src="./jquery.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
@@ -20,18 +21,15 @@
 	  </div>
 
 	  <div class="main ui container">
-			<h1 class="ui center aligned header" style="margin:50px 0 50px 0;">Welcome to Typer's Project</h1>
-
 			<div class="ui grid" style="margin-top: 50px">
-				<div class="three wide column"></div>
-				<div class="ten wide column">
-				<!--<form class="ui form" onsubmit="search()">-->
-				<form class="ui form">
-					<div class="field ui icon input" id="searchform" style="width: 100%">
-						<input type="text" name="email" id="email" placeholder="Customer Email">
-						<i class="search link icon" id="search"></i>
-					</div>
-				</form>
+				<div class="ten wide centered column">
+					<!--<form class="ui form" onsubmit="search()">-->
+					<form class="ui form">
+						<div class="field ui icon input" style="width: 100%">
+							<input type="text" name="email" id="email" placeholder="Customer Email">
+							<i class="search link icon" id="search"></i>
+						</div>
+					</form>
 				</div>
 			</div>
 
@@ -71,8 +69,8 @@
 		$(document).ready(function(){
 			$("#search").click(function() {
 				var emailVal = $("#email").val();
-				var customerUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/customers/" + emailVal;
-				var addrUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1/addresses/";
+				var customerUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/project2/customers/" + emailVal;
+				var addrUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/project2/addresses/";
 				$.getJSON(customerUrl, function(data) {
 					if(data.item != "") {
 						$(".searchresult table tbody tr td:first-child").html(data.item["firstname"]);

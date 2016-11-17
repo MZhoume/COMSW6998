@@ -40,7 +40,7 @@
 
   window.fbAsyncInit = function() {
   FB.init({
-    appId      : '1156254427788185',
+    appId      : '{your-app-id}',
     cookie     : true,  // enable cookies to allow the server to access 
                         // the session
     xfbml      : true,  // parse social plugins on this page
@@ -81,7 +81,7 @@
     FB.api('/me', function(response) {
       console.log('Successful login for: ' + response.name);
       document.getElementById('status').innerHTML =
-        'Thanks for logging in, ' + JSON.stringify(response) + '!';
+        'Thanks for logging in, ' + response.name + '!';
     });
   }
 </script>
@@ -91,7 +91,8 @@
   the JavaScript SDK to present a graphical Login button that triggers
   the FB.login() function when clicked.
 -->
-<fb:login-button scope="public_profile,email" perms="user_address,user_mobile_phone" onlogin="checkLoginState();">
+
+<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
 </fb:login-button>
 
 <div id="status">
