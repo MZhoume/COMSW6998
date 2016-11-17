@@ -78,15 +78,34 @@
     <div class="ui text menu"><div class="item copyright">Copyright &copy; 2016 Typer. All rights reserved.</div></div>
 
 
-    <div class="ui small modal">
+    <div class="ui basic modal">
         <i class="close icon"></i>
-        <div class="header">Customer successfully created.</div>
+        <div class="header">
+            Archive Old Messages
+        </div>
+        <div class="image content">
+            <div class="image">
+            <i class="archive icon"></i>
+            </div>
+            <div class="description">
+            <p>Your inbox is getting full, would you like us to enable automatic archiving of old messages?</p>
+            </div>
+        </div>
         <div class="actions">
-            <div class="fluid ui buttons">
-                <div class="ui ok basic button">OK</div>
+            <div class="two fluid ui inverted buttons">
+            <div class="ui cancel red basic inverted button">
+                <i class="remove icon"></i>
+                No
+            </div>
+            <div class="ui ok green basic inverted button">
+                <i class="checkmark icon"></i>
+                Yes
+            </div>
             </div>
         </div>
     </div>
+
+    <button id="mod">show modal</button>
 
     <script>
         /*
@@ -175,6 +194,23 @@
                 return false;
             }
         };
+
+        function checkPhonenumber(phonenumber) {
+            var regex = /[2-9]{2}\d{8}/;
+            if(regex.test(phonenumber)) {
+
+            }
+
+
+        };
+
+        function checkAddress(address) {
+
+        };
+
+        $('#mod').click(function(){
+            $('.ui.basic.modal').modal('show');
+        });
 		</script>
 
     <script>
