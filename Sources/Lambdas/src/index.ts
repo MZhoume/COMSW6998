@@ -42,7 +42,9 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
         case 'update':
             if (tableName === addressesTableName) {
                 tcWrapper(async () => {
-                    let r = await dbManager.get(tableName, event.payload);
+                    let k = tryFind(event.payload, 'key', undefined);
+                    let r = await dbManager.get(customersTableName, { key: k });
+                    r = await dbManager.get(addressesTableName, { key: { delivery_point_barcode: r.delivery_point_barcode } });
 
                     let values = tryFind(event.payload, 'values', {});
                     for (let k of getFields(tableName)) {
@@ -58,8 +60,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
                         await dbManager.create(tableName, addr);
                     }
 
-                    let email = tryFind(event.payload, 'email', undefined);
-                    return dbManager.update(customersTableName, { key: { email: email }, values: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    return dbManager.update(customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } });
                 }, callback);
             } else {
                 tcWrapper(() => dbManager.update(tableName, event.payload), callback);
