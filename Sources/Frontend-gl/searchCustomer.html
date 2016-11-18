@@ -33,7 +33,39 @@
 						</div>
 					</div>
 				</div>
-				<div class="row update-table">
+
+				<div class="row result-table" style="display: none;">
+					<div class="thirteen wide centered column">
+						<table class="ui blue table attached segment">
+							<thead>
+								<tr>
+									<th>Fisrname</th>
+									<th>Lastname</th>
+									<th>Email</th>
+									<th>Phone Number</th>
+									<th>Operation</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td>
+										<button class="ui yellow basic button update-btn">Update</button>
+										<button class="ui red basic button delete-btn">Delete</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div class="ui bottom attached success message delete-msg" style="display: none;">
+							<i class="icon hand peace"></i>Customer successfully deleted!
+						</div>
+					</div>
+				</div>
+
+				<div class="row update-table" style="display: none">
 					<div class="ten wide centered column">
 						<div class="ui attached message">
 							<div class="header">Update customer profile</div>
@@ -55,22 +87,19 @@
 							<div class="field">
 								<label>Address</label>
 								<div class="fields">
-									<div class="four wide field">
-										<input type="text" name="num" id="street_number" placeholder="No.">
-									</div>
-									<div class="twelve wide field">
-										<input type="text" name="street" id="route" placeholder="Street">
+									<div class="sixteen wide field">
+										<input type="text" name="street">
 									</div>
 								</div>
 								<div class="three fields">
 									<div class="field">
-										<input type="text" name="apt" id="street_number" placeholder="Apt/Suite">
+										<input type="text" name="apt">
 									</div>
 									<div class="field">
-										<input type="text" name="city" id="locality" placeholder="City">
+										<input type="text" name="city">
 									</div>
 									<div class="field">
-										<input type="text" name="zipcode" id="postal_code" placeholder="Zipcode"/>
+										<input type="text" name="zipcode"/>
 									</div>
 								</div>
 							</div>
@@ -84,31 +113,6 @@
 							<i class="icon hand peace"></i>
 							Profile successfully updated!</a>.
 						</div>
-					</div>
-				</div>
-
-				<div class="row result-table" style="display: none;">
-					<div class="thirteen wide centered column">
-						<table class="ui blue table">
-							<thead>
-								<tr>
-									<th>Fisrname</th>
-									<th>Lastname</th>
-									<th>Email</th>
-									<th>Phone Number</th>
-									<th>Operation</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-							</tbody>
-						</table>
 					</div>
 				</div>
 
@@ -129,45 +133,47 @@
 
 	<script>
 		$(document).ready(function(){
-			$("#search").click(function() {
-				var emailVal = $("#email").val();
-				var customerUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/project2/customers/" + emailVal;
-				var addressUrl = "https://vq6yw7je2i.execute-api.us-east-1.amazonaws.com/hw1_new/addresses/";
-				$.getJSON(customerUrl, function(data) {
-					if(data.item) {
-						$(".result-table table tbody tr td:first-child").html(data.item["firstname"]);
-						$(".result-table table tbody tr td:nth-child(2)").html(data.item["lastname"]);
-						$(".result-table table tbody tr td:nth-child(3)").html(data.item["email"]);
-						$(".result-table table tbody tr td:nth-child(4)").html(data.item["phonenumber"]);
-						$(".result-table table tbody tr td:last-child").html("");
-						$(".result-table table tbody tr td:last-child").append('<button class="ui yellow basic button update-btn">Update</button>');
-						$(".result-table table tbody tr td:last-child").append('<a href="' + customerUrl + '"><button class="ui red basic button">Delete</button></a>');
+			var emailVal = "";
+			var customerUrl = "";
 
-						$("input[name='firstname']").val(data.item["firstname"]);
-						$("input[name='lastname']").val(data.item["lastname"]);
-						$("input[name='email']").val(data.item["email"]);
-						$("input[name='phonenumber']").val(data.item["phonenumber"]);
-						addressUrl = addressUrl  + data.item["Delivery_Point_Barcode"];
+			$("#search").click(function() {
+				$(".delete-meg").hide();
+				emailVal = $("#email").val();
+				customerUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers/" + emailVal;
+				
+				$.ajax({
+                    type : 'GET',
+                    url : customerUrl,
+                    success : function(data) {
+                        $(".result-table table tbody tr td:first-child").html(data["firstname"]);
+						$(".result-table table tbody tr td:nth-child(2)").html(data["lastname"]);
+						$(".result-table table tbody tr td:nth-child(3)").html(data["email"]);
+						$(".result-table table tbody tr td:nth-child(4)").html(data["phonenumber"]);
+
+						$("input[name='firstname']").val(data["firstname"]);
+						$("input[name='lastname']").val(data["lastname"]);
+						$("input[name='email']").val(data["email"]);
+						$("input[name='phonenumber']").val(data["phonenumber"]);
+						var addressUrl = data.link["address"];
+						$.getJSON(addressUrl, function(data) {
+							if(data) {
+								$("input[name='street']").val(data["street"]);
+								$("input[name='apt']").val(data["num"]);
+								$("input[name='city']").val(data["city"]);
+								$("input[name='zipcode']").val(data["zipcode"]);
+							}
+						});
 						
-						//$(".update-table").hide();
+						$(".update-table").hide();
 						$(".noresult").hide();
 						$(".result-table").show();
-					}
-					else {
-						$(".update-table").hide();
+                    },
+                    error : function() {
+                        $(".update-table").hide();
 						$(".result-table").hide();
 						$(".noresult").show();
-					}
-				});
-				
-				$.getJSON(addressUrl, function(data) {
-					if(data.item) {
-						$("input[name='street']").val(data.item["street"]);
-						$("input[name='apt']").val(data.item["num"]);
-						$("input[name='city']").val(data.item["city"]);
-						$("input[name='zipcode']").val(data.item["zipcode"]);
-					}
-				});
+                    }
+                });
 			});
 
 			$(".update-btn").click(function(){
@@ -176,10 +182,19 @@
 				$(".update-table").show();
 			});
 
-
-			$("input[name='email']").blur(function(){
-				checkEmail($(this).val());
+			$(".delete-btn").click(function(){
+				$.ajax({
+					type : 'DELETE',
+					url : customerUrl,
+					data : {
+						email : emailVal
+					},
+					success: function() {
+						$(".delete-meg").show();
+					}
+				});
 			});
+
 			$("input[name='phonenumber']").blur(function(){
 				checkPhonenumber($(this).val());
 			});
