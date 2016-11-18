@@ -34,24 +34,3 @@ h4
 	margin-top: 70px;
 	margin-bottom: 100px;
 }
-
-.searchresult table
-{
-	display: none;
-}
-
-.searchresult h5
-{
-	display: none;
-}
-
-/* Create customer */
-#email-dup-err
-{
-	display: none;
-}
-
-#email-invalid-err
-{
-	display: none;
-}
