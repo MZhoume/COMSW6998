@@ -1,5 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
-
 import { DynamoDBAsync } from './DynamoDBAsync';
 import { getFields } from '../DB/Fields';
 import { IDBManager } from '../Interface/IDBManager';

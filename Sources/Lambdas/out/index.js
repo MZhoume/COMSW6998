@@ -1,4 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -43,7 +42,9 @@ function handler(event, context, callback) {
         case 'update':
             if (tableName === Fields_1.addressesTableName) {
                 tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
-                    let r = yield dbManager.get(tableName, event.payload);
+                    let k = Helpers_1.tryFind(event.payload, 'key', undefined);
+                    let r = yield dbManager.get(Fields_1.customersTableName, { key: k });
+                    r = yield dbManager.get(Fields_1.addressesTableName, { key: { delivery_point_barcode: r.delivery_point_barcode } });
                     let values = Helpers_1.tryFind(event.payload, 'values', {});
                     for (let k of Fields_1.getFields(tableName)) {
                         if (values[k] && values[k] !== r[k]) {
@@ -57,8 +58,7 @@ function handler(event, context, callback) {
                     catch (err) {
                         yield dbManager.create(tableName, addr);
                     }
-                    let email = Helpers_1.tryFind(event.payload, 'email', undefined);
-                    return dbManager.update(Fields_1.customersTableName, { key: { email: email }, values: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    return dbManager.update(Fields_1.customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } });
                 }), callback);
             }
             else {

@@ -1,5 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
-
 import { DynamoDB } from 'aws-sdk';
 
 function composePromise(method: (params: any, callback: (err, res) => void) => void, params: any): Promise<any> {

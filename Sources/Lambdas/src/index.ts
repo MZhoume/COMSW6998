@@ -1,5 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
-
 import * as lambda from 'aws-lambda';
 import * as request from 'request';
 import { IDBManager } from './Interface/IDBManager';

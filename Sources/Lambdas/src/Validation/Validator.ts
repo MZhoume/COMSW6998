@@ -1,5 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
-
 import { tryFind } from '../Helpers/Helpers';
 
 var Validator = {

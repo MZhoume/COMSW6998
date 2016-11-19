@@ -1,4 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
 "use strict";
 const aws_sdk_1 = require('aws-sdk');
 function composePromise(method, params) {

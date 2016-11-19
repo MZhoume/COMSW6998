@@ -1,5 +1,3 @@
-/// <reference path="../../typings/index.d.ts" />
-
 import * as request from 'request-promise';
 import { ISmartyStreetResponse } from '../Interface/ISmartyStreetResponse';
 import { tryFind } from '../Helpers/Helpers';
