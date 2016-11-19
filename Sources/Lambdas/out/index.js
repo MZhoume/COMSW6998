@@ -34,7 +34,24 @@ function handler(event, context, callback) {
                     return;
                 }
             }
-            tcWrapper(() => __awaiter(this, void 0, void 0, function* () { return dbManager.create(tableName, tableName === Fields_1.addressesTableName ? yield AddressValidation_1.requestValidAddr(event.payload) : event.payload); }), callback);
+            if (tableName === Fields_1.addressesTableName) {
+                tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
+                    let k = Helpers_1.tryFind(event.payload, 'key', undefined);
+                    let r = yield dbManager.get(Fields_1.customersTableName, { key: k });
+                    // TODO: if customer already have an address, how to store more?
+                    let addr = yield AddressValidation_1.requestValidAddr(event.payload);
+                    try {
+                        yield dbManager.get(Fields_1.addressesTableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    }
+                    catch (err) {
+                        yield dbManager.create(tableName, addr);
+                    }
+                    return dbManager.update(Fields_1.customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } });
+                }), callback);
+            }
+            else {
+                tcWrapper(() => dbManager.create(tableName, event.payload), callback);
+            }
             break;
         case 'read':
             tcWrapper(() => dbManager.get(tableName, event.payload), callback);

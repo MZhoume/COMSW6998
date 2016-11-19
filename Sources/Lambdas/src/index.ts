@@ -30,7 +30,24 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
                 }
             }
 
-            tcWrapper(async () => dbManager.create(tableName, tableName === addressesTableName ? await requestValidAddr(event.payload) : event.payload), callback);
+            if (tableName === addressesTableName) {
+                tcWrapper(async () => {
+                    let k = tryFind(event.payload, 'key', undefined);
+                    let r = await dbManager.get(customersTableName, { key: k });
+                    // TODO: if customer already have an address, how to store more?
+
+                    let addr = await requestValidAddr(event.payload);
+                    try {
+                        await dbManager.get(addressesTableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    } catch (err) {
+                        await dbManager.create(tableName, addr);
+                    }
+
+                    return dbManager.update(customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } })
+                }, callback);
+            } else {
+                tcWrapper(() => dbManager.create(tableName, event.payload), callback);
+            }
             break;
 
         case 'read':
