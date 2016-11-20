@@ -13,6 +13,7 @@ const AddressValidation_1 = require('./Validation/AddressValidation');
 const Helpers_1 = require('./Helpers/Helpers');
 const HttpCodes_1 = require('./Helpers/HttpCodes');
 const Fields_1 = require('./DB/Fields');
+const dbManager = new DynamoDBManager_1.DynamoDBManager();
 function tcWrapper(method, callback) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -23,8 +24,17 @@ function tcWrapper(method, callback) {
         }
     });
 }
+function createIfNotExist(tableName, payload, keyName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield dbManager.get(tableName, { key: payload[keyName] });
+        }
+        catch (err) {
+            yield dbManager.create(tableName, payload);
+        }
+    });
+}
 function handler(event, context, callback) {
-    let dbManager = new DynamoDBManager_1.DynamoDBManager();
     let tableName = event.tableName;
     switch (event.operation) {
         case 'create':
@@ -36,17 +46,9 @@ function handler(event, context, callback) {
             }
             if (tableName === Fields_1.addressesTableName) {
                 tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
-                    let k = Helpers_1.tryFind(event.payload, 'key', undefined);
-                    let r = yield dbManager.get(Fields_1.customersTableName, { key: k });
-                    // TODO: if customer already have an address, how to store more?
                     let addr = yield AddressValidation_1.requestValidAddr(event.payload);
-                    try {
-                        yield dbManager.get(Fields_1.addressesTableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
-                    }
-                    catch (err) {
-                        yield dbManager.create(tableName, addr);
-                    }
-                    return dbManager.update(Fields_1.customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } });
+                    createIfNotExist(tableName, addr, 'delivery_point_barcode');
+                    return dbManager.update(Fields_1.customersTableName, { key: Helpers_1.tryFind(event.payload, 'key', undefined), values: { delivery_point_barcode: addr.delivery_point_barcode } });
                 }), callback);
             }
             else {
@@ -69,12 +71,7 @@ function handler(event, context, callback) {
                         }
                     }
                     let addr = yield AddressValidation_1.requestValidAddr(r);
-                    try {
-                        yield dbManager.get(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
-                    }
-                    catch (err) {
-                        yield dbManager.create(tableName, addr);
-                    }
+                    createIfNotExist(tableName, addr, 'delivery_point_barcode');
                     return dbManager.update(Fields_1.customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } });
                 }), callback);
             }

@@ -9,6 +9,8 @@ import { HttpCodes } from './Helpers/HttpCodes';
 import { ISmartyStreetResponse } from './Interface/ISmartyStreetResponse';
 import { getFields, getFieldsToCheck, customersTableName, addressesTableName } from './DB/Fields';
 
+const dbManager: IDBManager = new DynamoDBManager();
+
 async function tcWrapper(method: () => Promise<any>, callback: lambda.Callback): Promise<any> {
     try {
         callback(undefined, await method());
@@ -17,8 +19,15 @@ async function tcWrapper(method: () => Promise<any>, callback: lambda.Callback):
     }
 }
 
+async function createIfNotExist(tableName: string, payload: any, keyName: string) {
+    try {
+        await dbManager.get(tableName, { key: payload[keyName] });
+    } catch (err) {
+        await dbManager.create(tableName, payload);
+    }
+}
+
 export function handler(event, context: lambda.Context, callback: lambda.Callback): void {
-    let dbManager: IDBManager = new DynamoDBManager();
     let tableName = event.tableName;
 
     switch (event.operation) {
@@ -32,18 +41,9 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
 
             if (tableName === addressesTableName) {
                 tcWrapper(async () => {
-                    let k = tryFind(event.payload, 'key', undefined);
-                    let r = await dbManager.get(customersTableName, { key: k });
-                    // TODO: if customer already have an address, how to store more?
-
                     let addr = await requestValidAddr(event.payload);
-                    try {
-                        await dbManager.get(addressesTableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
-                    } catch (err) {
-                        await dbManager.create(tableName, addr);
-                    }
-
-                    return dbManager.update(customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } })
+                    createIfNotExist(tableName, addr, 'delivery_point_barcode');
+                    return dbManager.update(customersTableName, { key: tryFind(event.payload, 'key', undefined), values: { delivery_point_barcode: addr.delivery_point_barcode } })
                 }, callback);
             } else {
                 tcWrapper(() => dbManager.create(tableName, event.payload), callback);
@@ -69,11 +69,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
                     }
 
                     let addr = await requestValidAddr(r);
-                    try {
-                        await dbManager.get(tableName, { key: { delivery_point_barcode: addr.delivery_point_barcode } });
-                    } catch (err) {
-                        await dbManager.create(tableName, addr);
-                    }
+                    createIfNotExist(tableName, addr, 'delivery_point_barcode');
 
                     return dbManager.update(customersTableName, { key: k, values: { delivery_point_barcode: addr.delivery_point_barcode } });
                 }, callback);
