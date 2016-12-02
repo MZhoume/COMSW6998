@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="./semantic/dist/semantic.min.css">
     <script src="./semantic/dist/semantic.min.js"></script>
     <script src="./jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
 
@@ -26,18 +27,18 @@
                     <div class="header">Welcome to our site!</div>
                     <p>Fill out the form below to create a new customer</p>
                 </div>
-                <div class="ui form attached segment">
+                <div class="ui form attached segment" ng-app="createCustomerApp" ng-controller="HttpController">
                     <div class="field">
                         <label>Name</label>
                         <div class="two fields">
-                            <div class="field"><input type="text" name="firstname" placeholder="First Name"></div>
-                            <div class="field"><input type="text" name="lastname" placeholder="Last Name"></div>
+                            <div class="field"><input type="text" ng-model="firstname" placeholder="First Name"></div>
+                            <div class="field"><input type="text" ng-model="lastname" placeholder="Last Name"></div>
                         </div>
                         <div class="two fields">
                             <div class="field">
-                                <input type="text" name="email" placeholder="Email">
+                                <input type="text" ng-model="email" placeholder="Email">
                             </div>
-                            <div class="field"><input type="text" name="phonenumber" placeholder="Phone Number"></div>
+                            <div class="field"><input type="text" ng-model="phonenumber" placeholder="Phone Number"></div>
                         </div>
                     </div>
                     <div class="field">
@@ -47,26 +48,26 @@
                         </div>
                         <div class="ui horizontal divider">or enter manually</div>
                         <div class="fields">
-                            <div class="four wide field">
-                                <input type="text" name="num" id="street_number" placeholder="No.">
+                            <div class="three wide field">
+                                <input type="text" id="street_number" ng-model="num" placeholder="No.">
                             </div>
-                            <div class="twelve wide field">
-                                <input type="text" name="street" id="route" placeholder="Street">
+                            <div class="thirteen wide field">
+                                <input type="text" id="route" ng-model="street" placeholder="Street">
                             </div>
                         </div>
                         <div class="three fields">
                             <div class="field">
-                                <input type="text" name="apt" id="street_number" placeholder="Apt/Suite">
+                                <input type="text" name="apt" ng-model="apt" placeholder="Apt No.">
                             </div>
                             <div class="field">
-                                <input type="text" name="city" id="locality" placeholder="City">
+                                <input type="text" id="locality" ng-model="city" placeholder="City">
                             </div>
                             <div class="field">
-                                <input type="text" name="zipcode" id="postal_code" placeholder="Zipcode"/>
+                                <input type="text" id="postal_code" ng-model="zipcode" placeholder="Zipcode"/>
                             </div>
                         </div>
                     </div>
-                    <button class="ui primary button" id="create-btn">Create</button>
+                    <button class="ui primary button" ng-click="saveCustomer()">Create</button>
                 </div>
                 <div class="ui bottom attached negative message" style="display: none">
                     <i class="icon remove"></i>
@@ -83,114 +84,66 @@
     <div class="ui text menu"><div class="item copyright">Copyright &copy; 2016 Typer. All rights reserved.</div></div>
 
     <script>
-		$(document).ready(function(){
-            $("input[name='email']").blur(function(){
-                checkEmail($(this).val());
-            });
-            $("input[name='phonenumber']").blur(function(){
-                checkPhonenumber($(this).val());
-            });
+    var app = angular.module("createCustomerApp", []);
+        app.controller("HttpController", function ($scope, $http) {
 
-			$("#create-btn").click(function() {
-                var customerUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
-                //var addrUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
-                var firstnameVal = $("input[name='firstname']").val();
-                var lastnameVal = $("input[name='lastname']").val();
-                var emailVal = $("input[name='email']").val();
-                var phonenumberVal = $("input[name='phonenumber']").val();
-                var numVal = $("input[name='street_number']").val();
-                var streetVal = $("input[name='route']").val();
-                var cityVal = $("input[name='city']").val();
-                var stateVal = $("input[name='state']").val();
-                var zipcodeVal = $("input[name='zipcode']").val();
-                var countryVal = $("input[name='country']").val();
-                //var addressVal = numVal + streetVal + cityVal + stateVal + zipcodeVal + countryVall;
-                console.log('before nul check');
-                if(!checkNull(firstnameVal, lastnameVal, emailVal, phonenumberVal, numVal, streetVal, cityVal, stateVal, zipcodeVal, countryVal)) return;
-                console.log('before email check');
-                if(!checkEmail(emailVal)) return;
-                console.log('before tel ck');
-                if(!checkPhonenumber(phonenumberVal)) return;
-                //if(!checkAddress(aVal)) return;
+            $scope.saveCustomer = function () {
+                if(!checkNull($scope.firstname, $scope.lastname, $scope.email, $scope.phonenumber, 
+                              $scope.num, $scope.street, $scope.apt, $scope.city, $scope.zipcode))
+                    return;
+                if(!checkPhonenumber($scope.phonenumber)) return;
+                // todo check address
 
-                /*
-                {
-                    "operation": "create",
-                    "tableName": "customers",
-                    "payload": {
-                        "item": {"fistname":"emily","lastname":"hua","phonenumber":"3472782514","email":"huaye1992@gmail.com"}
+                var custdata = $.param({
+                    email : $scope.email,
+                    firstname : $scope.firstName,
+                    lastname : $scope.lastName,
+                    phonenumber : $scope.phonenumber
+                });
+
+                var addrdata = $.param({
+                    street : $scope.street,
+                    apt : $scope.apt,
+                    city : $scope.city,
+                    zipcode : $scope.zipcode
+                });
+
+                var config = {
+                    headers : {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin' : '*',
+                        'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Origin'
                     }
                 }
-                */
-                console.log('before post');
-                $.ajax({
-                    type : 'POST',
-                    url : customerUrl,
-                    crossDomain : true,
-                    data : {
-                        operation : "create",
-                        tableName : "customers",
-                        payload : {
-                            item : {
-                                email : emailVal,
-                                firstname : firstnameVal,
-                                lastname : lastnameVal,
-                                phonenumber : phonenumberVal
-                                /*, address_ref : addressVal*/
-                            }
-                        }
-                    },
-                    dataType: 'jsonp',
-                    headers: {
-                        "Access-Control-Allow-Origin" : "*"
-                    },
-                    success: function() {
-                        $(".negative.message").hide();
-                        $(".success.message").show();
-                    },
-                    error: function() {
-                        $(".success.message").hide();
-                        $("#error-msg").html('Failed to create new customer, please try again later.');
-                        $(".negative.message").show();
-                    }
+
+                $http.post('https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers', custdata, config)
+                .success(function (data, status, headers, config) {
+                    $(".negative.message").hide();
+                    $(".success.message").show();
+                })
+                .error(function (data, status, header, config) {
+                    $(".success.message").hide();
+                    $("#error-msg").html('Failed to create new customer, please try again later.');
+                    $(".negative.message").show();
                 });
-			});
-		});
-        function checkNull(firstnameVal, lastnameVal, emailVal, phonenumberVal, numVal, streetVal, cityVal, stateVal, zipcodeVal, countryVal) {
-            if(firstnameVal == "" || lastnameVal == "" ||
-                emailVal == "" || phonenumberVal == "" ||
-                numVal == "" || streetVal == "" ||
-                cityVal == "" || stateVal == "" ||
-                zipcodeVal == "" || countryVal == "") {
+
+                // todo save address
+            };
+        });
+
+        $("input[name='phonenumber']").blur(function(){
+            checkPhonenumber($(this).val());
+        });
+
+        function checkNull(firstnameVal, lastnameVal, emailVal, phonenumberVal, numVal, streetVal, aptVal, cityVal, zipcodeVal) {
+            console.log('in check, ' + aptVal);
+            if(firstnameVal || lastnameVal || emailVal || phonenumberVal || numVal || aptVal || streetVal || cityVal || zipcodeVal) {
                 $('#error-msg').html('All fields are required.');
                 $('.negative.message').show();
                 $('.success.message').hide();
                 return false;
             }
             return true;
-        };
-
-        function checkEmail(email) {
-            $(".negative.message").hide();
-            var regex = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
-            if(regex.test(email)) {
-                var customerUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers/" + email;
-                $.getJSON(customerUrl, function(data) {
-                    if(data.item != "") {
-                        $(".success.message").hide();
-                        $("#error-msg").html('Email already registered.');
-                        $(".negative.message").show();
-                        return false;
-                    }
-                });
-                return true;
-            }
-            else {
-                $(".success.message").hide();
-                $("#error-msg").html('Invalid email.');
-                $(".negative.message").show();
-                return false;
-            }
         };
 
         function checkPhonenumber(phonenumber) {
@@ -205,12 +158,23 @@
             }
         };
 
+        // todo save address
         function checkAddress(address) {
+            //var addrUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
+            //var addressVal = numVal + streetVal + cityVal + stateVal + zipcodeVal + countryVall;
+            //if(!checkAddress(aVal)) return;
 
+            /*
+            {
+                "operation": "create",
+                "tableName": "customers",
+                "payload": {
+                    "item": {"fistname":"emily","lastname":"hua","phonenumber":"3472782514","email":"huaye1992@gmail.com"}
+                }
+            }
+            */
         };
-
-        
-		</script>
+    </script>
 
     <script>
       // This example displays an address form, using the autocomplete feature
@@ -248,7 +212,7 @@
         // Get each component of the address from the place details
         // and fill the corresponding field on the form.
         //var street = place.address_components[0][componentForm["street_number"]] + " " + place.address_components[1][componentForm["route"]];
-        //document.getElementById("street").value = street;
+        //document.getElementById("street").placeholder = street;
 
         for (var i = 0; i < place.address_components.length; i++) {
           var addressType = place.address_components[i].types[0];

@@ -21,14 +21,13 @@
 	  </div>
 
 	  <div class="main ui container">
-			<div class="ui grid" style="margin-top: 50px">
+			<div class="ui grid" style="margin-top: 50px" ng-app="searchCustomerApp" ng-controller="HttpController">
 				<div class="row">
 					<div class="ten wide centered column">
-						<!--<form class="ui form" onsubmit="search()">-->
 						<div class="ui form">
-							<div class="field ui icon input" style="width: 100%">
-								<input type="text" name="email" id="email" placeholder="Customer Email">
-								<i class="search link icon" id="search"></i>
+							<div class="field ui icon input" style="width: 100%" >
+								<input type="text" name="searchemail" ng-model="searchemail" placeholder="Customer Email">
+								<i class="search link icon" ng-click="searchCustomer()"></i>
 							</div>
 						</div>
 					</div>
@@ -48,13 +47,13 @@
 							</thead>
 							<tbody>
 								<tr>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
+									<td>{{firstname}}</td>
+									<td>{{lastname}}</td>
+									<td>{{email}}</td>
+									<td>{{phonenumber}}</td>
 									<td>
 										<button class="ui yellow basic button update-btn">Update</button>
-										<button class="ui red basic button delete-btn">Delete</button>
+										<button class="ui red basic button" ng-click="deleteCustomer()">Delete</button>
 									</td>
 								</tr>
 							</tbody>
@@ -74,36 +73,36 @@
 							<div class="field">
 								<label>Name</label>
 								<div class="two fields">
-									<div class="field"><input type="text" name="firstname" placeholder="First Name"></div>
-									<div class="field"><input type="text" name="lastname" placeholder="Last Name"></div>
+									<div class="field"><input type="text" name="firstname" value="{{firstname}}"></div>
+									<div class="field"><input type="text" name="lastname" value="{{lastname}}"></div>
 								</div>
 								<div class="two fields">
 									<div class="field">
-										<input type="text" name="email" placeholder="Email" disabled>
+										<input type="text" name="email" value="{{email}}" disabled>
 									</div>
-									<div class="field"><input type="text" name="phonenumber" placeholder="Phone Number"></div>
+									<div class="field"><input type="text" name="phonenumber" value="{{phonenumber}}"></div>
 								</div>
 							</div>
 							<div class="field">
 								<label>Address</label>
 								<div class="fields">
 									<div class="sixteen wide field">
-										<input type="text" name="street">
+										<input type="text" name="street" ng-model="street" value="{{street}}">
 									</div>
 								</div>
 								<div class="three fields">
 									<div class="field">
-										<input type="text" name="apt">
+										<input type="text" name="apt" ng-model="apt" value="{{apt}}">
 									</div>
 									<div class="field">
-										<input type="text" name="city">
+										<input type="text" name="city" ng-model="city" value="{{city}}">
 									</div>
 									<div class="field">
-										<input type="text" name="zipcode"/>
+										<input type="text" name="zipcode" ng-model="zipcode" value="{{zipcode}}"/>
 									</div>
 								</div>
 							</div>
-							<button class="ui primary button" id="update-submit">Update</button>
+							<button class="ui primary button" ng-click="updateCustomer()">Update</button>
 						</div>
 						<div class="ui bottom attached negative message" style="display: none">
 							<i class="icon remove"></i>
@@ -132,167 +131,150 @@
 	</div>
 
 	<script>
-		$(document).ready(function(){
-			var emailVal = "";
-			var customerUrl = "";
-
-			$("#search").click(function() {
-				$(".delete-meg").hide();
-				emailVal = $("#email").val();
-				customerUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers/" + emailVal;
-				
-				$.ajax({
-                    type : 'GET',
-                    url : customerUrl,
-                    success : function(data) {
-                        $(".result-table table tbody tr td:first-child").html(data["firstname"]);
-						$(".result-table table tbody tr td:nth-child(2)").html(data["lastname"]);
-						$(".result-table table tbody tr td:nth-child(3)").html(data["email"]);
-						$(".result-table table tbody tr td:nth-child(4)").html(data["phonenumber"]);
-
-						$("input[name='firstname']").val(data["firstname"]);
-						$("input[name='lastname']").val(data["lastname"]);
-						$("input[name='email']").val(data["email"]);
-						$("input[name='phonenumber']").val(data["phonenumber"]);
-						var addressUrl = data.link["address"];
-						$.getJSON(addressUrl, function(data) {
-							if(data) {
-								$("input[name='street']").val(data["street"]);
-								$("input[name='apt']").val(data["num"]);
-								$("input[name='city']").val(data["city"]);
-								$("input[name='zipcode']").val(data["zipcode"]);
-							}
-						});
-						
-						$(".update-table").hide();
+	var app = angular.module("searchCustomerApp", []);
+        app.controller("HttpController", function ($scope, $http) {
+        	$scope.searchCustomer = function () {
+                $http.get('https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers/' + $scope.searchemail)
+                .then(function(response) {
+                	if(response.data) {
+                		$scope.firstname = response.data["firstname"];
+	                    $scope.lastname = response.data["lastname"];
+	                    $scope.email = response.data["email"];
+	                    $scope.phonenumber = response.data["phonenumber"];
+	                    
+	                    $http.get(response.data.link["address"])
+		                .then(function(resp) {
+		                    $scope.street = resp.data["street"];
+		                    $scope.apt = resp.data["apt"];
+		                    $scope.city = resp.data["city"];
+		                    $scope.zipcode = resp.data["zipcode"];
+	                	});
+	                	$(".update-table").hide();
 						$(".noresult").hide();
 						$(".result-table").show();
-                    },
-                    error : function() {
-                        $(".update-table").hide();
+                	} else {
+                		$(".update-table").hide();
 						$(".result-table").hide();
 						$(".noresult").show();
-                    }
+                	}
+                }, function(response) {
+			        $(".update-table").hide();
+					$(".result-table").hide();
+					$(".noresult").show();
+			    });
+            };
+
+            $scope.updateCustomer = function () {
+                if(!checkNull($("input[name='firstname']").val(), 
+                	$("input[name='lastname']").val(), 
+                	$("input[name='phonenumber']").val(), 
+                	$("input[name='street]").val(), 
+                	$("input[name='apt']").val(), 
+                	$("input[name='city']").val(), 
+                	$("input[name='zipcode']").val())) return;
+                if(!checkPhonenumber($("input[name='phonenumber']").val())) return;
+            	// todo check address
+
+                var custdata = $.param({
+                    email : $scope.email,
+                    firstname : $scope.firstName,
+                    lastname : $scope.lastName,
+                    phonenumber : $scope.phonenumber
                 });
-			});
 
-			$(".update-btn").click(function(){
-				$(".result-table").hide();
-				$(".noresult").hide();
-				$(".update-table").show();
-			});
+                var addrdata = $.param({
+                    street : $scope.street,
+                    apt : $scope.apt,
+                    city : $scope.city,
+                    zipcode : $scope.zipcode
+                });
 
-			$(".delete-btn").click(function(){
-				$.ajax({
-					type : 'DELETE',
-					url : customerUrl,
-					data : {
-						email : emailVal
-					},
-					success: function() {
-						$(".delete-meg").show();
-					}
-				});
-			});
+                var config = {
+                    headers : {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin' : '*',
+                        'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Origin'
+                    }
+                }
 
-			$("input[name='phonenumber']").blur(function(){
-				checkPhonenumber($(this).val());
-			});
-
-			$("#update-submit").click(function() {
-				var customerUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
-				//var addrUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
-				var firstnameVal = $("input[name='firstname']").val();
-				var lastnameVal = $("input[name='lastname']").val();
-				var emailVal = $("input[name='email']").val();
-				var phonenumberVal = $("input[name='phonenumber']").val();
-				var numVal = $("input[name='street_number']").val();
-				var streetVal = $("input[name='route']").val();
-				var cityVal = $("input[name='city']").val();
-				var stateVal = $("input[name='state']").val();
-				var zipcodeVal = $("input[name='zipcode']").val();
-				var countryVal = $("input[name='country']").val();
-				//var addressVal = numVal + streetVal + cityVal + stateVal + zipcodeVal + countryVall;
-				console.log('before nul check');
-				if(!checkNull(firstnameVal, lastnameVal, emailVal, phonenumberVal, numVal, streetVal, cityVal, stateVal, zipcodeVal, countryVal)) return;
-				console.log('before email check');
-				console.log('before tel ck');
-				if(!checkPhonenumber(phonenumberVal)) return;
-				//if(!checkAddress(aVal)) return;
-
-				/*
-				{
-					"operation": "create",
-					"tableName": "customers",
-					"payload": {
-						"item": {"fistname":"emily","lastname":"hua","phonenumber":"3472782514","email":"huaye1992@gmail.com"}
-					}
-				}
-				*/
-				console.log('before post');
-				$.ajax({
-					type : 'POST',
-					url : customerUrl,
-					crossDomain : true,
-					data : {
-						operation : "create",
-						tableName : "customers",
-						payload : {
-							item : {
-								email : emailVal,
-								firstname : firstnameVal,
-								lastname : lastnameVal,
-								phonenumber : phonenumberVal
-								/*, address_ref : addressVal*/
-							}
-						}
-					},
-					dataType: 'jsonp',
-					headers: {
-						"Access-Control-Allow-Origin" : "*"
-					},
-					success: function() {
-						$(".negative.message").hide();
-						$(".success.message").show();
-					},
-					error: function() {
-						$(".success.message").hide();
-						$("#error-msg").html('Failed to create new customer, please try again later.');
-						$(".negative.message").show();
-					}
-				});
-			});
-
-			function checkNull(firstnameVal, lastnameVal, emailVal, phonenumberVal, numVal, streetVal, cityVal, stateVal, zipcodeVal, countryVal) {
-				if(firstnameVal == "" || lastnameVal == "" ||
-					emailVal == "" || phonenumberVal == "" ||
-					numVal == "" || streetVal == "" ||
-					cityVal == "" || stateVal == "" ||
-					zipcodeVal == "" || countryVal == "") {
-					$('#error-msg').html('All fields are required.');
-					$('.negative.message').show();
-					$('.success.message').hide();
-					return false;
-				}
-				return true;
-			};
-
-			function checkPhonenumber(phonenumber) {
-				$(".negative.message").hide();
-				var regex = /^\d{10}$/;
-				if(regex.test(phonenumber)) return true;
-				else {
-					$(".success.message").hide();
-					$("#error-msg").html('Invalid phone number.');
+                $http.post('https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers', custdata, config)
+                .success(function (data, status, headers, config) {
+                    $(".negative.message").hide();
+					$(".success.message").show();
+                })
+                .error(function (data, status, header, config) {
+                    $(".success.message").hide();
+					$("#error-msg").html('Failed to create new customer, please try again later.');
 					$(".negative.message").show();
-					return false;
-				}
-			};
+                });
 
-			function checkAddress(address) {
+                // todo update address
+            };
 
-			};
+            $scope.deleteCustomer = function () {
+            	var config = {
+                    headers : {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin' : '*',
+                        'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Origin'
+                    }
+                }
+
+                $http.delete('https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers' + $scope.email, config)
+                .success(function (data, status, headers, config) {
+                    $(".delete-meg").show();
+                });
+            };
+        });
+
+		$(".update-btn").click(function(){
+			$(".result-table").hide();
+			$(".noresult").hide();
+			$(".update-table").show();
 		});
+
+		$("input[name='phonenumber']").blur(function(){
+			checkPhonenumber($(this).val());
+		});
+
+		function checkNull(firstnameVal, lastnameVal, phonenumberVal, streetVal, aptVal, cityVal, zipcodeVal) {
+			if(firstnameVal || lastnameVal || phonenumberVal || aptVal || streetVal || cityVal || zipcodeVal) {
+				$('#error-msg').html('All fields are required.');
+				$('.negative.message').show();
+				$('.success.message').hide();
+				return false;
+			}
+			return true;
+		};
+
+		function checkPhonenumber(phonenumber) {
+			$(".negative.message").hide();
+			var regex = /^\d{10}$/;
+			if(regex.test(phonenumber)) return true;
+			else {
+				$(".success.message").hide();
+				$("#error-msg").html('Invalid phone number.');
+				$(".negative.message").show();
+				return false;
+			}
+		};
+
+		// todo update address
+		function checkAddress(address) {
+			//var addrUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
+			//var addressVal = numVal + streetVal + cityVal + stateVal + zipcodeVal + countryVall;
+			//if(!checkAddress(aVal)) return;
+
+			/*
+			{
+				"operation": "create",
+				"tableName": "customers",
+				"payload": {
+					"item": {"fistname":"emily","lastname":"hua","phonenumber":"3472782514","email":"huaye1992@gmail.com"}
+				}
+			}
+			*/
+		};
 	</script>
 	</body>
 </html>
