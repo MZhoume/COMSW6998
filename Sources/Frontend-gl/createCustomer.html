@@ -137,7 +137,7 @@
 
         function checkNull(firstnameVal, lastnameVal, emailVal, phonenumberVal, numVal, streetVal, aptVal, cityVal, zipcodeVal) {
             console.log('in check, ' + aptVal);
-            if(firstnameVal || lastnameVal || emailVal || phonenumberVal || numVal || aptVal || streetVal || cityVal || zipcodeVal) {
+            if(firstnameVal == ""|| lastnameVal == ""|| emailVal == "" || phonenumberVal == "" || numVal == "" || aptVal == "" || streetVal == "" || cityVal == "" || zipcodeVal == "") {
                 $('#error-msg').html('All fields are required.');
                 $('.negative.message').show();
                 $('.success.message').hide();
