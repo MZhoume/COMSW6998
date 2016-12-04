@@ -4,7 +4,7 @@ import { IDBManager } from '../Interface/IDBManager';
 import { tryFind } from '../Helpers/Helpers';
 
 export class DynamoDBManager implements IDBManager {
-    _db: DynamoDBAsync = new DynamoDBAsync();
+    _db = new DynamoDBAsync();
 
     async create(tableName: string, payload: any): Promise<any> {
         let k = getFields(tableName)[0];
