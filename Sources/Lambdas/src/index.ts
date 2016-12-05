@@ -1,12 +1,12 @@
 import * as lambda from 'aws-lambda';
 import * as request from 'request';
-import { IDBManager } from './Interface/IDBManager';
+import { IDBManager } from './Interfaces/IDBManager';
 import { DynamoDBManager } from './DB/DynamoDBManager';
 import { validate } from './Validation/Validator';
 import { requestValidAddr } from './Validation/AddressValidation';
 import { genLambdaError, tryFind } from './Helpers/Helpers';
 import { HttpCodes } from './Helpers/HttpCodes';
-import { ISmartyStreetResponse } from './Interface/ISmartyStreetResponse';
+import { ISmartyStreetResponse } from './Interfaces/ISmartyStreetResponse';
 import { getFields, getFieldsToCheck, customersTableName, addressesTableName } from './DB/Fields';
 
 const dbManager: IDBManager = new DynamoDBManager();

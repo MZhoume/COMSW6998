@@ -1,6 +1,6 @@
 import { DynamoDBAsync } from './DynamoDBAsync';
 import { getFields } from '../DB/Fields';
-import { IDBManager } from '../Interface/IDBManager';
+import { IDBManager } from '../Interfaces/IDBManager';
 import { tryFind } from '../Helpers/Helpers';
 
 export class DynamoDBManager implements IDBManager {

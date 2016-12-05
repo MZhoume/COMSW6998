@@ -15,7 +15,7 @@ let options = {
 };
 
 var paths = {
-    src: ['src/**/*.ts', '!src/Interface', '!src/Interface/**'],
+    src: ['src/**/*.ts', '!src/Interfaces', '!src/Interfaces/**'],
     out: ['out/**', '!out', '!out/package.json', '!out/node_modules', '!out/node_modules/**'],
     zip: ['out/**']
 };

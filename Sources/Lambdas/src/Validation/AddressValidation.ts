@@ -1,5 +1,5 @@
 import * as request from 'request-promise';
-import { ISmartyStreetResponse } from '../Interface/ISmartyStreetResponse';
+import { ISmartyStreetResponse } from '../Interfaces/ISmartyStreetResponse';
 import { tryFind } from '../Helpers/Helpers';
 import * as statics from '../Statics';
 

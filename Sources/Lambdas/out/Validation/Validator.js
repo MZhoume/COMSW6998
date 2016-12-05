@@ -1,5 +1,5 @@
 "use strict";
-const Helpers_1 = require('../Helpers/Helpers');
+const Helpers_1 = require("../Helpers/Helpers");
 var Validator = {
     email: (email) => {
         // From: http://emailregex.com
