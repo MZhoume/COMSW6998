@@ -20,8 +20,10 @@ async function tcWrapper(method: () => Promise<any>, callback: lambda.Callback):
 }
 
 async function createIfNotExist(tableName: string, payload: any, keyName: string) {
+    let key = {};
+    key[keyName] = tryFind(payload, keyName, undefined);
     try {
-        await dbManager.get(tableName, { key: payload[keyName] });
+        await dbManager.get(tableName, { key: key });
     } catch (err) {
         await dbManager.create(tableName, payload);
     }
@@ -41,6 +43,10 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
 
             if (tableName === addressesTableName) {
                 tcWrapper(async () => {
+                    let k = tryFind(event.payload, 'key', undefined);
+                    let r = await dbManager.get(customersTableName, { key: k });
+                    if (r.delivery_point_barcode) throw `${r.email} already have an address attached`;
+
                     let addr = await requestValidAddr(event.payload);
                     createIfNotExist(tableName, addr, 'delivery_point_barcode');
                     return dbManager.update(customersTableName, { key: tryFind(event.payload, 'key', undefined), values: { delivery_point_barcode: addr.delivery_point_barcode } })
@@ -89,7 +95,7 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
         case 'getaddr':
             tcWrapper(async () => {
                 let r = await dbManager.get(customersTableName, event.payload);
-                return dbManager.get(addressesTableName, { "key": { delivery_point_barcode: r.delivery_point_barcode } });
+                return dbManager.get(addressesTableName, { key: { delivery_point_barcode: r.delivery_point_barcode } });
             }, callback);
             break;
 

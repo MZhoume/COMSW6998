@@ -26,8 +26,10 @@ function tcWrapper(method, callback) {
 }
 function createIfNotExist(tableName, payload, keyName) {
     return __awaiter(this, void 0, void 0, function* () {
+        let key = {};
+        key[keyName] = Helpers_1.tryFind(payload, keyName, undefined);
         try {
-            yield dbManager.get(tableName, { key: payload[keyName] });
+            yield dbManager.get(tableName, { key: key });
         }
         catch (err) {
             yield dbManager.create(tableName, payload);
@@ -46,6 +48,10 @@ function handler(event, context, callback) {
             }
             if (tableName === Fields_1.addressesTableName) {
                 tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
+                    let k = Helpers_1.tryFind(event.payload, 'key', undefined);
+                    let r = yield dbManager.get(Fields_1.customersTableName, { key: k });
+                    if (r.delivery_point_barcode)
+                        throw `${r.email} already have an address attached`;
                     let addr = yield AddressValidation_1.requestValidAddr(event.payload);
                     createIfNotExist(tableName, addr, 'delivery_point_barcode');
                     return dbManager.update(Fields_1.customersTableName, { key: Helpers_1.tryFind(event.payload, 'key', undefined), values: { delivery_point_barcode: addr.delivery_point_barcode } });
@@ -88,7 +94,7 @@ function handler(event, context, callback) {
         case 'getaddr':
             tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
                 let r = yield dbManager.get(Fields_1.customersTableName, event.payload);
-                return dbManager.get(Fields_1.addressesTableName, { "key": { delivery_point_barcode: r.delivery_point_barcode } });
+                return dbManager.get(Fields_1.addressesTableName, { key: { delivery_point_barcode: r.delivery_point_barcode } });
             }), callback);
             break;
         default:
