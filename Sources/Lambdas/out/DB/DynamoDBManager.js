@@ -19,7 +19,7 @@ class DynamoDBManager {
             let k = Fields_1.getFields(tableName)[0];
             let v = Helpers_1.tryFind(payload, k, undefined);
             if (!v)
-                throw `${k} does not exist in request.`;
+                throw `${k || 'Key'} does not exist in request.`;
             let key = {};
             key[k] = v;
             let r = yield this._db.get({
@@ -27,7 +27,7 @@ class DynamoDBManager {
                 Key: key
             });
             if (r && r.Item)
-                throw `${v} already exists.`;
+                throw `${v || 'Item'} already exists.`;
             let item = {};
             for (let e of Fields_1.getFields(tableName))
                 item[e] = Helpers_1.tryFind(payload, e, undefined);

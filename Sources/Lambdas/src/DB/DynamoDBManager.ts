@@ -9,7 +9,7 @@ export class DynamoDBManager implements IDBManager {
     async create(tableName: string, payload: any): Promise<any> {
         let k = getFields(tableName)[0];
         let v = tryFind(payload, k, undefined);
-        if (!v) throw `${k} does not exist in request.`;
+        if (!v) throw `${k || 'Key'} does not exist in request.`;
 
         let key = {};
         key[k] = v;
@@ -17,7 +17,7 @@ export class DynamoDBManager implements IDBManager {
             TableName: tableName,
             Key: key
         });
-        if (r && r.Item) throw `${v} already exists.`;
+        if (r && r.Item) throw `${v || 'Item'} already exists.`;
 
         let item = {};
         for (let e of getFields(tableName))
