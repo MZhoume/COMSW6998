@@ -39,6 +39,10 @@ function createIfNotExist(tableName, payload, keyName) {
 function handler(event, context, callback) {
     let tableName = event.tableName;
     switch (event.operation) {
+        // create address requires customer email
+        // {key: {email: xxx}, street: xxx ...}
+        // create customer
+        // {email: xxx ...}
         case 'create':
             for (let r of Fields_1.getFieldsToCheck(tableName)) {
                 if (!Validator_1.validate(event.payload, r)) {
@@ -61,9 +65,15 @@ function handler(event, context, callback) {
                 tcWrapper(() => dbManager.create(tableName, event.payload), callback);
             }
             break;
+        // read requires key
+        // {key: {...}}
         case 'read':
             tcWrapper(() => dbManager.get(tableName, event.payload), callback);
             break;
+        // update address requires customer email
+        // {key: {email: xxx}, values: {xxx}}
+        // update customer
+        // {key: {email: xxx}, values: {xxx}}
         case 'update':
             if (tableName === Fields_1.addressesTableName) {
                 tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
@@ -85,15 +95,22 @@ function handler(event, context, callback) {
                 tcWrapper(() => dbManager.update(tableName, event.payload), callback);
             }
             break;
+        // delete requires key
+        // {key: {xxx}}
         case 'delete':
             tcWrapper(() => dbManager.delete(tableName, event.payload), callback);
             break;
+        // find requires expression and values
+        // {expression: xxx, values: {xxx}}
         case 'find':
             tcWrapper(() => dbManager.find(tableName, event.payload), callback);
             break;
+        // get address requires customer email
+        // {key: {email: xxx}}
         case 'getaddr':
             tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
-                let r = yield dbManager.get(Fields_1.customersTableName, event.payload);
+                let k = Helpers_1.tryFind(event.payload, 'key', undefined);
+                let r = yield dbManager.get(Fields_1.customersTableName, { key: k });
                 return dbManager.get(Fields_1.addressesTableName, { key: { delivery_point_barcode: r.delivery_point_barcode } });
             }), callback);
             break;

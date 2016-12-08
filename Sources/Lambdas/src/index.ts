@@ -33,6 +33,11 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
     let tableName = event.tableName;
 
     switch (event.operation) {
+        // create address requires customer email
+        // {key: {email: xxx}, street: xxx ...}
+
+        // create customer
+        // {email: xxx ...}
         case 'create':
             for (let r of getFieldsToCheck(tableName)) {
                 if (!validate(event.payload, r)) {
@@ -56,10 +61,17 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
             }
             break;
 
+        // read requires key
+        // {key: {...}}
         case 'read':
             tcWrapper(() => dbManager.get(tableName, event.payload), callback);
             break;
 
+        // update address requires customer email
+        // {key: {email: xxx}, values: {xxx}}
+
+        // update customer
+        // {key: {email: xxx}, values: {xxx}}
         case 'update':
             if (tableName === addressesTableName) {
                 tcWrapper(async () => {
@@ -84,17 +96,24 @@ export function handler(event, context: lambda.Context, callback: lambda.Callbac
             }
             break;
 
+        // delete requires key
+        // {key: {xxx}}
         case 'delete':
             tcWrapper(() => dbManager.delete(tableName, event.payload), callback);
             break;
 
+        // find requires expression and values
+        // {expression: xxx, values: {xxx}}
         case 'find':
             tcWrapper(() => dbManager.find(tableName, event.payload), callback);
             break;
 
+        // get address requires customer email
+        // {key: {email: xxx}}
         case 'getaddr':
             tcWrapper(async () => {
-                let r = await dbManager.get(customersTableName, event.payload);
+                let k = tryFind(event.payload, 'key', undefined);
+                let r = await dbManager.get(customersTableName, { key: k });
                 return dbManager.get(addressesTableName, { key: { delivery_point_barcode: r.delivery_point_barcode } });
             }, callback);
             break;
