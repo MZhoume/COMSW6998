@@ -19,10 +19,30 @@ const episodeFields = ['UUID', 'name', 'seriesID'];
 const customersChecks = ['email'];
 const addressesChecks = ['zipcode'];
 
+const franchiseTracebacks = ['property'];
+const seriesTracebacks = ['property', 'franchise'];
+const episodeTracebacks = ['property', 'franchise', 'series'];
+
 export function getFields(tableName: string): string[] {
-    return eval(`${tableName}Fields`);
+    try {
+        return eval(`${tableName}Fields`);
+    } catch (ex) {
+        return [];
+    }
 }
 
 export function getFieldsToCheck(tableName: string): string[] {
-    return eval(`${tableName}Checks`);
+    try {
+        return eval(`${tableName}Checks`);
+    } catch (ex) {
+        return [];
+    }
+}
+
+export function getTracebacks(tableName: string): string[] {
+    try {
+        return eval(`${tableName}Tracebacks`);
+    } catch (ex) {
+        return [];
+    }
 }

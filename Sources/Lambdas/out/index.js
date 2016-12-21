@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
+const sha1 = require("sha1");
 const DynamoDBManager_1 = require("./DB/DynamoDBManager");
 const Validator_1 = require("./Validation/Validator");
 const AddressValidation_1 = require("./Validation/AddressValidation");
@@ -22,6 +23,13 @@ function tcWrapper(method, callback) {
         }
     });
 }
+function generateID(tableName, payload, dataSource) {
+    if (tableName !== 'property') {
+        let tbn = Fields_1.getTracebacks(tableName);
+        let tnn = tbn[tbn.length - 1];
+        payload[`${tnn}ID`] = sha1(dataSource[tnn]);
+    }
+}
 function handler(event, context, callback) {
     let tableName = event.tableName;
     let dbManager = new DynamoDBManager_1.DynamoDBManager();
@@ -36,8 +44,32 @@ function handler(event, context, callback) {
             if (tableName === 'addresses') {
                 tcWrapper(() => __awaiter(this, void 0, void 0, function* () { return dbManager.create(tableName, yield AddressValidation_1.requestValidAddr(event.payload)); }), callback);
             }
-            else {
+            else if (tableName === 'customers') {
                 tcWrapper(() => dbManager.create(tableName, event.payload), callback);
+            }
+            else {
+                tcWrapper(() => __awaiter(this, void 0, void 0, function* () {
+                    let tb = Fields_1.getTracebacks(tableName);
+                    for (let i = 0; i < tb.length; i++) {
+                        let tn = tb[i];
+                        let uuid = sha1(event.payload[tn]);
+                        let payload = {
+                            UUID: uuid,
+                            name: event.payload[tn]
+                        };
+                        generateID(tn, payload, event.payload);
+                        try {
+                            yield dbManager.get(tn, { key: { UUID: uuid } });
+                        }
+                        catch (ex) {
+                            yield dbManager.create(tn, payload);
+                        }
+                    }
+                    let payload = event.payload;
+                    payload['UUID'] = sha1(event.payload['name']);
+                    generateID(tableName, payload, payload);
+                    return dbManager.create(tableName, event.payload);
+                }), callback);
             }
             break;
         case 'get':
@@ -53,6 +85,9 @@ function handler(event, context, callback) {
             break;
         case 'delete':
             tcWrapper(() => dbManager.delete(tableName, event.payload), callback);
+            break;
+        case 'find':
+            tcWrapper(() => dbManager.find(tableName, event.payload), callback);
             break;
         case 'echo':
             callback(null, event.payload);

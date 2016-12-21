@@ -3,4 +3,5 @@ export interface IDBManager {
     get(tableName: string, payload: any): Promise<any>;
     update(tableName: string, payload: any): Promise<any>;
     delete(tableName: string, payload: any): Promise<any>;
+    find(tableName: string, payload: any): Promise<any>;
 }
