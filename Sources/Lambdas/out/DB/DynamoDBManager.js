@@ -80,5 +80,12 @@ class DynamoDBManager {
             });
         });
     }
+    find(tableName, payload) {
+        return this._db.find({
+            TableName: tableName,
+            FilterExpression: Helpers_1.tryFind(payload, 'expression', undefined),
+            ExpressionAttributeValues: Helpers_1.tryFind(payload, 'values', undefined)
+        });
+    }
 }
 exports.DynamoDBManager = DynamoDBManager;

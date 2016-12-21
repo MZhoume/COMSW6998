@@ -32,7 +32,7 @@ export class DynamoDBManager implements IDBManager {
     async get(tableName: string, payload: any): Promise<any> {
         let key = tryFind(payload, 'key', undefined);
         if (!key) throw `Key does not exist in request.`;
-        
+
         let r = await this._db.get({
             TableName: tableName,
             Key: key
@@ -68,6 +68,14 @@ export class DynamoDBManager implements IDBManager {
         return this._db.delete({
             TableName: tableName,
             Key: tryFind(payload, 'key', undefined)
+        });
+    }
+
+    find(tableName: string, payload: any): Promise<any> {
+        return this._db.find({
+            TableName: tableName,
+            FilterExpression: tryFind(payload, 'expression', undefined),
+            ExpressionAttributeValues: tryFind(payload, 'values', undefined)
         });
     }
 }
