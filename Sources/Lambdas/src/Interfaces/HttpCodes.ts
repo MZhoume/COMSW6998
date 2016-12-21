@@ -1,4 +1,4 @@
-export enum HttpCodes {
+export const enum HttpCodes {
     Continue = 100,
     SwitchingProtocols = 101,
     OK = 200,

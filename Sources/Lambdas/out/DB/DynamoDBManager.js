@@ -39,7 +39,9 @@ class DynamoDBManager {
     }
     get(tableName, payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            let key = Helpers_1.tryFind(payload, 'key', {});
+            let key = Helpers_1.tryFind(payload, 'key', undefined);
+            if (!key)
+                throw `Key does not exist in request.`;
             let r = yield this._db.get({
                 TableName: tableName,
                 Key: key
@@ -64,7 +66,7 @@ class DynamoDBManager {
             }
             return this._db.update({
                 TableName: tableName,
-                Key: Helpers_1.tryFind(payload, 'key', {}),
+                Key: Helpers_1.tryFind(payload, 'key', undefined),
                 AttributeUpdates: attributes
             });
         });
@@ -74,15 +76,8 @@ class DynamoDBManager {
             yield this.get(tableName, payload);
             return this._db.delete({
                 TableName: tableName,
-                Key: Helpers_1.tryFind(payload, 'key', {})
+                Key: Helpers_1.tryFind(payload, 'key', undefined)
             });
-        });
-    }
-    find(tableName, payload) {
-        return this._db.find({
-            TableName: tableName,
-            FilterExpression: Helpers_1.tryFind(payload, 'expression', undefined),
-            ExpressionAttributeValues: Helpers_1.tryFind(payload, 'values', undefined)
         });
     }
 }
