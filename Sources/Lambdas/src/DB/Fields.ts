@@ -1,10 +1,3 @@
-export const ContentInstances = {
-    Episode: 'episode',
-    Property: 'property',
-    Franchise: 'franchise',
-    Series: 'series'
-};
-
 const customersFields = ['email', 'password', 'firstname', 'lastname', 'phonenumber', 'delivery_point_barcode'];
 const addressesFields = ['delivery_point_barcode', 'city', 'street', 'num', 'zipcode'];
 
@@ -19,9 +12,9 @@ const episodeFields = ['UUID', 'name', 'seriesID'];
 const customersChecks = ['email'];
 const addressesChecks = ['zipcode'];
 
-const franchiseTracebacks = ['property'];
-const seriesTracebacks = ['property', 'franchise'];
-const episodeTracebacks = ['property', 'franchise', 'series'];
+const franchiseTraceback = 'property';
+const seriesTraceback = 'franchise';
+const episodeTraceback = 'series';
 
 export function getFields(tableName: string): string[] {
     try {
@@ -39,10 +32,10 @@ export function getFieldsToCheck(tableName: string): string[] {
     }
 }
 
-export function getTracebacks(tableName: string): string[] {
+export function getTraceback(tableName: string): string {
     try {
-        return eval(`${tableName}Tracebacks`);
+        return eval(`${tableName}Traceback`);
     } catch (ex) {
-        return [];
+        return undefined;
     }
 }
