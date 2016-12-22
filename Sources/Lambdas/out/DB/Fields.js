@@ -1,10 +1,4 @@
 "use strict";
-exports.ContentInstances = {
-    Episode: 'episode',
-    Property: 'property',
-    Franchise: 'franchise',
-    Series: 'series'
-};
 const customersFields = ['email', 'password', 'firstname', 'lastname', 'phonenumber', 'delivery_point_barcode'];
 const addressesFields = ['delivery_point_barcode', 'city', 'street', 'num', 'zipcode'];
 // contentInstance is the type from ContentInstances
@@ -15,9 +9,9 @@ const seriesFields = ['UUID', 'name', 'franchiseID'];
 const episodeFields = ['UUID', 'name', 'seriesID'];
 const customersChecks = ['email'];
 const addressesChecks = ['zipcode'];
-const franchiseTracebacks = ['property'];
-const seriesTracebacks = ['property', 'franchise'];
-const episodeTracebacks = ['property', 'franchise', 'series'];
+const franchiseTraceback = 'property';
+const seriesTraceback = 'franchise';
+const episodeTraceback = 'series';
 function getFields(tableName) {
     try {
         return eval(`${tableName}Fields`);
@@ -36,12 +30,12 @@ function getFieldsToCheck(tableName) {
     }
 }
 exports.getFieldsToCheck = getFieldsToCheck;
-function getTracebacks(tableName) {
+function getTraceback(tableName) {
     try {
-        return eval(`${tableName}Tracebacks`);
+        return eval(`${tableName}Traceback`);
     }
     catch (ex) {
-        return [];
+        return undefined;
     }
 }
-exports.getTracebacks = getTracebacks;
+exports.getTraceback = getTraceback;
