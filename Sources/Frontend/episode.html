@@ -154,9 +154,17 @@
 							dataType : "json",
 							contentType : "application/json",
 							data: JSON.stringify({ "statements" :[{"statement":"MATCH (me:user {email:'huaye1994@gmail.com'})-[myrating:RATE]->(myratedepisode:content)\nMATCH (other:user)-[theirrating:RATE]->(myratedepisode)\nWHERE me <> other\nAND abs(myrating.score - theirrating.score) < 2\nWITH other, myratedepisode\nMATCH (other)-[otherrating:RATE]->(episode:content)\nWHERE myratedepisode <> episode\nWITH avg(otherrating.score) AS avgRating, episode\nRETURN episode\nORDER BY avgRating desc\nLIMIT 3", "params": {} }]}) ,
-              success: function(result) {
-								console.log(result);
-                $("#episode-value").text(JSON.stringify(result) ).fadeOut('slow').fadeIn('slow');
+              success: function(response) {
+								console.log(response.results[0].data);
+								//$("#episode-value").text(JSON.stringify(response.results[0].data[3]));
+								
+								var episodes = "";
+								for (var index in response.results[0].data){
+									   episodes += response.results[0].data[index].row[0].name + " | "
+								   
+								};
+								$("#episode-value").text(episodes);
+							
               }
             });
         });
