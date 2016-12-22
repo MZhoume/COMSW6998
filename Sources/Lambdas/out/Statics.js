@@ -5,3 +5,4 @@ exports.SS_StreetPrefix = '&street=';
 exports.SS_CityPrefix = '&city=';
 exports.SS_ZipCodePrefix = '&zipcode=';
 exports.Neo4jUrl = 'http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit';
+exports.snsFunctionName = 'slack_sns';
