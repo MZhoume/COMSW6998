@@ -19,8 +19,8 @@ async function invoke(event: any): Promise<string> {
     let dbManager: IDBManager = new DynamoDBManager();
     let sns = new AWS.SNS();
 
-    await sns.publish({
-        Message: `${operation} on table ${tableName} with payload: ${event.payload} -- Team Typer`,
+    sns.publish({
+        Message: `${operation} on table ${tableName} -- Team Typer`,
         TopicArn: 'arn:aws:sns:us-east-1:722850008576:comsTopic'
     });
 
