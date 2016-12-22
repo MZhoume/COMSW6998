@@ -82,17 +82,17 @@
 		};
 
 		function getInfo() {
-			FB.api('/me', 'GET', {fields: 'first_name, last_name, email, fieldname_of_type_Location'}, function(response) {
+			FB.api('/me', 'GET', {fields: 'first_name, last_name, email'}, function(response) {
 				document.getElementById('status').innerHTML = JSON.stringify(response);
 			});
 		}
 		</script>
 		<script>
-        FB.login(function(response) {
+        /*FB.login(function(response) {
           if (response.session && response.perms) {
             alert(response.perms);
           }
-        });
-        <script>
+        });*/
+        </script>
 	</body>
 </html>
