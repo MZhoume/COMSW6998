@@ -2,18 +2,18 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const sha1 = require("sha1");
-const DynamoDBManager_1 = require("./DB/DynamoDBManager");
-const Validator_1 = require("./Validation/Validator");
-const AddressValidation_1 = require("./Validation/AddressValidation");
-const Helpers_1 = require("./Helpers/Helpers");
-const Fields_1 = require("./DB/Fields");
-const Neo4j_1 = require("./Helpers/Neo4j");
+const sha1 = require('sha1');
+const DynamoDBManager_1 = require('./DB/DynamoDBManager');
+const Validator_1 = require('./Validation/Validator');
+const AddressValidation_1 = require('./Validation/AddressValidation');
+const Helpers_1 = require('./Helpers/Helpers');
+const Fields_1 = require('./DB/Fields');
+const Neo4j_1 = require('./Helpers/Neo4j');
 function asyncWrapper(method) {
     method();
 }
