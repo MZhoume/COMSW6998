@@ -6,3 +6,5 @@ export const SS_CityPrefix = '&city=';
 export const SS_ZipCodePrefix = '&zipcode=';
 
 export const Neo4jUrl = 'http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit';
+
+export const snsFunctionName = 'slack_sns';

@@ -1,3 +1,4 @@
+import * as AWS from 'aws-sdk';
 import * as lambda from 'aws-lambda';
 import * as request from 'request-promise';
 import * as sha1 from 'sha1';
@@ -10,151 +11,121 @@ import { HttpCodes } from './Interfaces/HttpCodes';
 import { ISmartyStreetResponse } from './Interfaces/ISmartyStreetResponse';
 import { getFields, getFieldsToCheck, getTraceback } from './DB/Fields';
 import { queryCypher } from './Helpers/Neo4j';
+import { snsFunctionName } from './Statics';
 
-function asyncWrapper(method: () => void): void {
-    method();
-}
-
-export function handler(event, context: lambda.Context, callback: lambda.Callback): void {
+async function invoke(event: any): Promise<string> {
     let tableName = event.tableName;
+    let operation = event.operation;
     let dbManager: IDBManager = new DynamoDBManager();
+    let sns = new AWS.SNS();
 
-    switch (event.operation) {
+    sns.publish({
+        Message: `${operation} on table ${tableName} -- Team Typer`,
+        TopicArn: 'arn:aws:sns:us-east-1:722850008576:comsTopic'
+    });
+
+    switch (operation) {
         case 'create':
             for (let r of getFieldsToCheck(tableName)) {
                 if (!validate(event.payload, r)) {
-                    callback(genLambdaError(HttpCodes.BadRequest, `${r} is not valid`));
-                    return;
+                    throw `${r} is not valid`;
                 }
             }
 
-            if (tableName === 'addresses') {
-                asyncWrapper(async () => {
-                    try {
-                        callback(null, await dbManager.create(tableName, await requestValidAddr(event.payload)));
-                    } catch (ex) {
-                        callback(genLambdaError(HttpCodes.BadRequest, ex));
+            switch (tableName) {
+                case 'addresses':
+                    return dbManager.create(tableName, await requestValidAddr(event.payload));
+                case 'customers':
+                    await queryCypher('CREATE (n:user { name: {name}, email: {email} })',
+                        {
+                            name: tryFind(event.payload, 'firstname', undefined) + ' ' + tryFind(event.payload, 'lastname', undefined),
+                            email: tryFind(event.payload, 'email', undefined)
+                        });
+                    return dbManager.create(tableName, event.payload);
+                case 'comment':
+                    let comment = tryFind(event.payload, 'comment', undefined);
+                    if (comment === undefined) {
+                        throw 'Comment does not exist in request.';
                     }
-                });
-            } else if (tableName === 'customers') {
-                asyncWrapper(async () => {
-                    try {
-                        await queryCypher('CREATE (n:user { name: {name}, email: {email} })',
-                            {
-                                name: tryFind(event.payload, 'firstname', undefined) + ' ' + tryFind(event.payload, 'lastname', undefined),
-                                email: tryFind(event.payload, 'email', undefined)
-                            });
-                        callback(null, await dbManager.create(tableName, event.payload));
-                    } catch (ex) {
-                        callback(genLambdaError(HttpCodes.BadRequest, ex));
-                    }
-                });
-            } else if (tableName === 'comment') {
-                let comment = tryFind(event.payload, 'comment', undefined);
-                if (comment === undefined) {
-                    callback(genLambdaError(HttpCodes.BadRequest, `Comment does not exist in request.`));
-                    return;
-                }
 
-                event.payload['UUID'] = sha1(comment);
-                asyncWrapper(async () => {
-                    try {
+                    event.payload['UUID'] = sha1(comment);
+
+                    if (event.payload['contentInstance'] === 'episode') {
                         await queryCypher('CREATE (c:comment { id: {id}, comment: {comment} })',
                             {
                                 id: event.payload['UUID'],
                                 comment: comment
                             });
-                        callback(null, await dbManager.create(tableName, event.payload));
-                    } catch (ex) {
-                        callback(genLambdaError(HttpCodes.BadRequest, ex));
+
+                        await queryCypher('MATCH (a:user),( b:comment) WHERE a.email = {email} AND b.id = {uuid} CREATE (a)-[r:COMMENTED]->(b)',
+                            {
+                                email: event.payload['userID'],
+                                uuid: event.payload['UUID']
+                            });
+
+                        await queryCypher('MATCH (a:comment),( b:content) WHERE a.id = {cuuid} AND b.id = {iuuid} CREATE (a)-[r:commentedUpon]->(b)',
+                            {
+                                cuuid: event.payload['UUID'],
+                                iuuid: event.payload['contentInstanceID']
+                            });
                     }
-                });
-            } else {
-                if (tableName !== 'property') {
-                    let tb = getTraceback(tableName);
-                    let v = tryFind(event.payload, tb, undefined);
-                    if (v === undefined) {
-                        callback(genLambdaError(HttpCodes.BadRequest, `${tb} does not exist in request.`));
-                        return;
-                    }
 
-                    event.payload[`${tb}ID`] = sha1(v);
-                }
-
-                let name = tryFind(event.payload, 'name', undefined);
-                if (name === undefined) {
-                    callback(genLambdaError(HttpCodes.BadRequest, `Name does not exist in request.`));
-                    return;
-                }
-
-                event.payload['UUID'] = sha1(name);
-                asyncWrapper(async () => {
-                    try {
-                        if (tableName === 'episode') {
-                            await queryCypher('CREATE (e:content { id: {id}, name: {name} })',
-                                {
-                                    id: event.payload['UUID'],
-                                    comment: name
-                                });
+                    return dbManager.create(tableName, event.payload);
+                default:
+                    if (tableName !== 'property') {
+                        let tb = getTraceback(tableName);
+                        let v = tryFind(event.payload, tb, undefined);
+                        if (v === undefined) {
+                            throw `${tb} does not exist in request.`;
                         }
-                        callback(null, await dbManager.create(tableName, event.payload));
-                    } catch (ex) {
-                        callback(genLambdaError(HttpCodes.BadRequest, ex));
+
+                        event.payload[`${tb}ID`] = sha1(v);
                     }
-                });
+
+                    let name = tryFind(event.payload, 'name', undefined);
+                    if (name === undefined) {
+                        throw 'Name does not exist in request.';
+                    }
+
+                    event.payload['UUID'] = sha1(name);
+                    if (tableName === 'episode') {
+                        await queryCypher('CREATE (e:content { id: {id}, name: {name} })',
+                            {
+                                id: event.payload['UUID'],
+                                comment: name
+                            });
+                    }
+                    return dbManager.create(tableName, event.payload);
             }
-            break;
 
         case 'get':
-            asyncWrapper(async () => {
-                try {
-                    callback(null, await dbManager.get(tableName, event.payload));
-                } catch (ex) {
-                    callback(genLambdaError(HttpCodes.BadRequest, ex));
-                }
-            });
-            break;
+            return dbManager.get(tableName, event.payload);
 
         case 'update':
             if (tableName === 'addresses') {
-                callback(genLambdaError(HttpCodes.BadRequest, 'Cannot update an address.'));
+                throw 'Cannot update addresses.';
             } else {
-                asyncWrapper(async () => {
-                    try {
-                        callback(null, await dbManager.update(tableName, event.payload));
-                    } catch (ex) {
-                        callback(genLambdaError(HttpCodes.BadRequest, ex));
-                    }
-                });
+                return dbManager.update(tableName, event.payload);
             }
-            break;
 
         case 'delete':
-            asyncWrapper(async () => {
-                try {
-                    callback(null, await dbManager.delete(tableName, event.payload));
-                } catch (ex) {
-                    callback(genLambdaError(HttpCodes.BadRequest, ex));
-                }
-            });
-            break;
+            return dbManager.delete(tableName, event.payload);
 
         case 'find':
-            asyncWrapper(async () => {
-                try {
-                    callback(null, await dbManager.find(tableName, event.payload));
-                } catch (ex) {
-                    callback(genLambdaError(HttpCodes.BadRequest, ex));
-                }
-            });
-            break;
+            return dbManager.find(tableName, event.payload);
 
         case 'echo':
-            callback(null, event.payload);
-            break;
+            return event.payload;
 
         default:
-            callback(genLambdaError(HttpCodes.BadRequest, "Bad Request Path"));
-            break;
+            throw 'Bad Request Path';
+    }
+}
+
+export async function handler(event: any, context: lambda.Context, callback: lambda.Callback): Promise<void> {
+    try {
+        callback(null, await invoke(event));
+    } catch (ex) {
+        callback(genLambdaError(HttpCodes.BadRequest, ex));
     }
 }
