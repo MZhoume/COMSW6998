@@ -9,6 +9,8 @@
         <link rel="stylesheet" type="text/css" href="./semantic/dist/semantic.min.css">
         <script src="./semantic/dist/semantic.min.js"></script>
 		<script src="./jquery.min.js"></script>
+		  
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
@@ -129,11 +131,11 @@
 		  </div>
 		</div>
 
-    <div class="container">
+    <div class="container" ng-app="getEpisodeRecommendationApp" ng-controller="HttpController">
       <div class="row">
         <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-3 col-md-offset-5 col-md-2 pagination-centered text-center">
           <h3>Recommend</h3>
-          <input id="btn-show-episode" type="button" class="btn btn-primary" value='Episode'>
+          <input id="btn-show-episode" type="button" class="btn btn-primary" value='Episode' ng-click="getEpisodes()">
 					<input id="btn-show-friend" type="button" class="btn btn-primary" value='Friend'>
         </div>
       </div>
@@ -142,8 +144,15 @@
           <p>You may also like: <span id="episode-value"></span></p>
         </div>
       </div>
+			<div class="ui bottom attached negative message" style="display: none">
+						<i class="icon remove"></i>
+						<span id="error-msg"></span>
+				</div>
+				<div class="ui bottom attached success message" style="display: none">
+						<i class="icon hand peace"></i>Customer successfully created! Please <a href="login.html">log in</a>.
+				</div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script>
       $(document).ready(function() {
@@ -152,8 +161,10 @@
 							type : "POST",
               url : "http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit",
 							accepts : { json: "application/json" },
+							crossDomain:true,
 							dataType : "json",
 							contentType : "application/json",
+							header: 'Access-Control-Allow-Origin: *',
 							data: JSON.stringify({ "statements" :[{"statement":"MATCH (me:user {email:'huaye1994@gmail.com'})-[myrating:RATE]->(myratedepisode:content)\nMATCH (other:user)-[theirrating:RATE]->(myratedepisode)\nWHERE me <> other\nAND abs(myrating.score - theirrating.score) < 2\nWITH other, myratedepisode\nMATCH (other)-[otherrating:RATE]->(episode:content)\nWHERE myratedepisode <> episode\nWITH avg(otherrating.score) AS avgRating, episode\nRETURN episode\nORDER BY avgRating desc\nLIMIT 3", "params": {} }]}) ,
               success: function(response) {
 								console.log(response.results[0].data);
@@ -168,14 +179,47 @@
             });
         });
       });
-    </script>
+    </script>-->
+		   <script>
+    var app = angular.module("getEpisodeRecommendationApp", []);
+        app.controller("HttpController", function ($scope, $http) {
+
+            $scope.getEpisodes = function () {
+
+
+                var config = {
+                    headers : {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin' : '*',
+                        'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Origin'
+                    }
+                }
+                var data = JSON.stringify({ "statements" :[{"statement":"MATCH (me:user {email:'huaye1994@gmail.com'})-[myrating:RATE]->(myratedepisode:content)\nMATCH (other:user)-[theirrating:RATE]->(myratedepisode)\nWHERE me <> other\nAND abs(myrating.score - theirrating.score) < 2\nWITH other, myratedepisode\nMATCH (other)-[otherrating:RATE]->(episode:content)\nWHERE myratedepisode <> episode\nWITH avg(otherrating.score) AS avgRating, episode\nRETURN episode\nORDER BY avgRating desc\nLIMIT 3", "params": {} }]}) 
+                $http.post("http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit", data, config)
+                .success(function (data, status, headers, config) {
+                    $(".negative.message").hide();
+                    $(".success.message").show();
+                })
+                .error(function (data, status, header, config) {
+                    $(".negative.message").html('Failed to create new customer because ' + data["error message"]);
+                    $(".negative.message").show();
+										$(".success.message").hide();
+                });
+
+                // todo save address
+            };
+        });
+   </script>
 		    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script>
       $(document).ready(function() {
         $('#btn-show-friend').on('click', function() {
+
             $.ajax({
 							type : "POST",
+    					
+    					crossDomain: true,
               url : "http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit",
 							accepts : { json: "application/json" },
 							dataType : "json",
