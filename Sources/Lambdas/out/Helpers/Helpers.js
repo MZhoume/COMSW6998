@@ -10,6 +10,9 @@ function tryFind(payload, key, def) {
         else if (payload.item && payload.item[key]) {
             return payload.item[key];
         }
+        else if (payload.items && payload.items[key]) {
+            return payload.items[key];
+        }
         else if (payload.values && payload.values[key]) {
             return payload.values[key];
         }
