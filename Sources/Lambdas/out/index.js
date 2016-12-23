@@ -38,7 +38,9 @@ function invoke(event) {
                 }
                 switch (tableName) {
                     case 'addresses':
-                        return dbManager.create(tableName, yield AddressValidation_1.requestValidAddr(event.payload));
+                        let addr = yield AddressValidation_1.requestValidAddr(event.payload);
+                        yield dbManager.create(tableName, addr);
+                        return addr;
                     case 'customers':
                         yield Neo4j_1.queryCypher('CREATE (n:user { name: {name}, email: {email} })', {
                             name: Helpers_1.tryFind(event.payload, 'firstname', undefined) + ' ' + Helpers_1.tryFind(event.payload, 'lastname', undefined),
