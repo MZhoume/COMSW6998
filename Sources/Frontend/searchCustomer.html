@@ -131,7 +131,7 @@
 	</div>
 
 	<script>
-	var app = angular.module("searchCustomerApp", []);
+		var app = angular.module("searchCustomerApp", []);
         app.controller("HttpController", function ($scope, $http) {
         	$scope.searchCustomer = function () {
                 $http.get('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/customers/' + $scope.searchemail)
