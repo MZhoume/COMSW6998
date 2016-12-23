@@ -23,7 +23,7 @@ function invoke(event) {
         let dbManager = new DynamoDBManager_1.DynamoDBManager();
         let sns = new AWS.SNS();
         sns.publish({
-            Message: `This just in: ${operation} on table ${tableName} -- Team Typer`,
+            Message: `This just in! ${operation} on table ${tableName} -- Team Typer`,
             TopicArn: Statics_1.snsArn
         }, (err, data) => {
             if (err)

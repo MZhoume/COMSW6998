@@ -20,7 +20,7 @@ async function invoke(event: any): Promise<any> {
     let sns = new AWS.SNS();
 
     sns.publish({
-        Message: `This just in: ${operation} on table ${tableName} -- Team Typer`,
+        Message: `This just in! ${operation} on table ${tableName} -- Team Typer`,
         TopicArn: snsArn
     }, (err, data) => {
         if (err)
