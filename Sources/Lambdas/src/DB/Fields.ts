@@ -9,7 +9,7 @@ const franchiseFields = ['UUID', 'name', 'propertyID'];
 const seriesFields = ['UUID', 'name', 'franchiseID'];
 const episodeFields = ['UUID', 'name', 'seriesID'];
 
-const customersChecks = ['email'];
+const customersChecks = ['email', 'phonenumber'];
 const addressesChecks = ['zipcode'];
 
 const franchiseTraceback = 'property';
