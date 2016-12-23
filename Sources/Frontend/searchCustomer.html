@@ -131,7 +131,7 @@
 	</div>
 
 	<script>
-	var app = angular.module("searchCustomerApp", []);
+		var app = angular.module("searchCustomerApp", []);
         app.controller("HttpController", function ($scope, $http) {
         	$scope.searchCustomer = function () {
                 $http.get('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/customers/' + $scope.searchemail)
@@ -207,8 +207,6 @@
 					$("#error-msg").html('Failed to update customer profile because ' + data["error message"]);
 					$(".negative.message").show();
                 });
-
-                // todo update address
             };
 
             $scope.deleteCustomer = function () {
@@ -259,22 +257,6 @@
 			}
 		};
 
-		// todo update address
-		function checkAddress(address) {
-			//var addrUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
-			//var addressVal = numVal + streetVal + cityVal + stateVal + zipcodeVal + countryVall;
-			//if(!checkAddress(aVal)) return;
-
-			/*
-			{
-				"operation": "create",
-				"tableName": "customers",
-				"payload": {
-					"item": {"fistname":"emily","lastname":"hua","phonenumber":"3472782514","email":"huaye1992@gmail.com"}
-				}
-			}
-			*/
-		};
 	</script>
 	</body>
 </html>
