@@ -1,4 +1,6 @@
 "use strict";
+const AWS = require("aws-sdk");
+const sns = new AWS.SNS();
 function tryFind(payload, key, def) {
     if (payload) {
         if (payload[key]) {
@@ -27,3 +29,17 @@ function genLambdaError(code, message) {
     return new Error(JSON.stringify({ code: code, message: message }));
 }
 exports.genLambdaError = genLambdaError;
+function publishSns(message, arn) {
+    return new Promise((resolve, reject) => {
+        sns.publish({
+            Message: message,
+            TopicArn: arn
+        }, (err, data) => {
+            if (err)
+                reject(err);
+            else
+                resolve(data);
+        });
+    });
+}
+exports.publishSns = publishSns;

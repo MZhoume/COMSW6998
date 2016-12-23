@@ -1,3 +1,7 @@
+import * as AWS from 'aws-sdk';
+
+const sns = new AWS.SNS();
+
 export function tryFind(payload: any, key: string, def: any): any {
     if (payload) {
         if (payload[key]) {
@@ -17,6 +21,20 @@ export function tryFind(payload: any, key: string, def: any): any {
     return def;
 }
 
-export function genLambdaError(code: number, message: string) {
+export function genLambdaError(code: number, message: string): Error {
     return new Error(JSON.stringify({ code: code, message: message }));
+}
+
+export function publishSns(message: string, arn: string): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+        sns.publish({
+            Message: message,
+            TopicArn: arn
+        }, (err, data) => {
+            if (err)
+                reject(err);
+            else
+                resolve(data);
+        });
+    });
 }
