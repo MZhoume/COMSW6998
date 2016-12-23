@@ -19,8 +19,6 @@ export async function handler(event: any, context: lambda.Context, callback: lam
     let tableName = event.tableName;
     let operation = event.operation;
 
-    let timestamp = new Date().getTime().toString();
-
     try {
         await publishSns(`This just in! ${operation} ${tableName ? `on table ${tableName}` : ''} with payload ${JSON.stringify(event.payload)} -- Team Typer`, snsArn);
 
@@ -57,7 +55,7 @@ export async function handler(event: any, context: lambda.Context, callback: lam
                             throw 'Comment does not exist in request.';
                         }
 
-                        event.payload['UUID'] = sha1(comment + timestamp);
+                        event.payload['UUID'] = sha1(comment);
 
                         if (tryFind(event.payload, 'contentInstance', undefined) === 'episode') {
                             await queryCypher('CREATE (c:comment { id: {id}, comment: {comment} })',
@@ -99,7 +97,7 @@ export async function handler(event: any, context: lambda.Context, callback: lam
                             throw 'Name does not exist in request.';
                         }
 
-                        event.payload['UUID'] = sha1(name + timestamp);
+                        event.payload['UUID'] = sha1(name);
                         if (tableName === 'episode') {
                             await queryCypher('CREATE (e:content { id: {id}, name: {name} })',
                                 {
@@ -111,7 +109,6 @@ export async function handler(event: any, context: lambda.Context, callback: lam
                         await dbManager.create(tableName, event.payload);
                         callback(null, `${tableName} created.`);
                         break;
-
                 }
 
             case 'get':

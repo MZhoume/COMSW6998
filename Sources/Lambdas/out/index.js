@@ -20,7 +20,6 @@ function handler(event, context, callback) {
     return __awaiter(this, void 0, void 0, function* () {
         let tableName = event.tableName;
         let operation = event.operation;
-        let timestamp = new Date().getTime().toString();
         try {
             yield Helpers_1.publishSns(`This just in! ${operation} ${tableName ? `on table ${tableName}` : ''} with payload ${JSON.stringify(event.payload)} -- Team Typer`, Statics_1.snsArn);
             switch (operation) {
@@ -49,7 +48,7 @@ function handler(event, context, callback) {
                             if (comment === undefined) {
                                 throw 'Comment does not exist in request.';
                             }
-                            event.payload['UUID'] = sha1(comment + timestamp);
+                            event.payload['UUID'] = sha1(comment);
                             if (Helpers_1.tryFind(event.payload, 'contentInstance', undefined) === 'episode') {
                                 yield Neo4j_1.queryCypher('CREATE (c:comment { id: {id}, comment: {comment} })', {
                                     id: event.payload['UUID'],
@@ -80,7 +79,7 @@ function handler(event, context, callback) {
                             if (name === undefined) {
                                 throw 'Name does not exist in request.';
                             }
-                            event.payload['UUID'] = sha1(name + timestamp);
+                            event.payload['UUID'] = sha1(name);
                             if (tableName === 'episode') {
                                 yield Neo4j_1.queryCypher('CREATE (e:content { id: {id}, name: {name} })', {
                                     id: event.payload['UUID'],
