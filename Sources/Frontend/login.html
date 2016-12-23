@@ -10,6 +10,7 @@
         <script src="./semantic/dist/semantic.min.js"></script>
 		<script src="./jquery.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
     </head>
     <body>
       <div class="ui secondary pointing menu">
@@ -19,7 +20,7 @@
 		  </div>
 	  </div>
 
-	  <div class="main ui container">
+	  <div class="main ui container" ng-app="loginApp" ng-controller="HttpController">
 			<div class="ui grid" style="margin-top: 50px">
             	<div class="four wide centered column">
 					<!--<form class="ui form">
@@ -78,21 +79,59 @@
 					// The person is not logged into Facebook, so we're not sure if
 					// they are logged into this app or not.
 				}
-			});
+			}, { scope: 'email' });
 		};
 
 		function getInfo() {
-			FB.api('/me', 'GET', {fields: 'first_name, last_name, email, fieldname_of_type_Location'}, function(response) {
+			FB.api('/me', 'GET', {fields: 'first_name, last_name, email'}, function(response) {
 				document.getElementById('status').innerHTML = JSON.stringify(response);
 			});
 		}
 		</script>
 		<script>
-        FB.login(function(response) {
+        /*FB.login(function(response) {
           if (response.session && response.perms) {
             alert(response.perms);
           }
-        });
+        });*/
+        </script>
+
+
         <script>
+    var app = angular.module("loginApp", []);
+        app.controller("HttpController", function ($scope, $http) {
+
+            $scope.saveCustomer = function () {
+                
+                if(!checkPhonenumber($scope.phonenumber)) return;
+
+                var custdata = {
+                    email : $scope.email,
+                    firstname : $scope.firstname,
+                    lastname : $scope.lastname,
+                    phonenumber : $scope.phonenumber
+                };
+
+                var config = {
+                    headers : {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin' : '*',
+                        'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Origin'
+                    }
+                }
+
+                $http.post('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/customers', custdata, config)
+                .success(function (data, status, headers, config) {
+                    $(".negative.message").hide();
+                    $(".success.message").show();
+                })
+                .error(function (data, status, header, config) {
+                    $(".success.message").hide();
+                    $("#error-msg").html('Failed to create new customer because ' + data["error message"]);
+                    $(".negative.message").show();
+                });
+            };
+        });
+    </script>
 	</body>
 </html>
