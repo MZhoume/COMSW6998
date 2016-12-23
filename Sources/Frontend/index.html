@@ -10,32 +10,233 @@
         <script src="./semantic/dist/semantic.min.js"></script>
 		<script src="./jquery.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
     </head>
     <body>
       <div class="ui secondary pointing menu">
       	<div class="header item">DoodleTV</div>
 		  <div class="right menu">
 			  <a class="active item" href="#">Home</a>
+			  <a class="item" href="searchCustomer.html">Search customer</a>
 		  </div>
 	  </div>
 
 	  <div class="main ui container">
-			<h1 class="ui center aligned header" style="margin:50px 0 50px 0;">Welcome to  DoodleTV</h1>
+		<h1 class="ui center aligned header welcome" style="margin:50px 0 50px 0;">Welcome to DoodleTV</h1>
 
-			<div class="ui grid" style="margin-top: 50px">
-				<div><h2>Try some functions</h2></div><br/>
-				<a class="ui orange basic button" href="createCustomer.html">Sign up</a>
-				<a class="ui yellow basic button" href="searchCustomer.html">Search customer</a>
-				<a class="ui green basic button" href="login.html">Log in</a>
-				<a class="ui red basic button" href="episode.html">Episode</a>
+		<div class="ui grid login" style="margin-top: 50px">
+        	<div class="four wide centered column">
+				<!--<form class="ui form">
+					<div class="field">
+						<div class="ui left icon input">
+						<input type="text" placeholder="Email">
+						<i class="user icon"></i>
+						</div>
+					</div>
+					<div class="field">
+						<div class="ui left icon input">
+						<input type="password" placeholder="Password">
+						<i class="lock icon"></i>
+						</div>
+					</div>
+					<button class="ui primary basic button">Log in</button>
+				</form>
+				<div class="ui horizontal divider">Or</div>-->
+				<button class="ui facebook fluid button" onclick="fblogin();"><i class="facebook icon"></i>Log in with Facebook</button>
+				<a class="ui green fluid button" href="createCustomer.html" style="margin-top: 5px;">Sign Up</a>
 			</div>
+		</div>
+
+
+
+		<div class="ui cards" style="margin-top: 50px">
+		  <div class="card">
+		    <div class="content">
+		      <div class="header">Emily Hua</div>
+		      <div class="description">
+		        Cofounder of DoodleTV
+		      </div>
+		    </div>
+		    <div class="ui bottom attached button">
+		      <i class="add icon"></i>
+		      Add Friend
+		    </div>
+		  </div>
+		  <div class="card">
+		    <div class="content">
+		      <div class="header">Ming Zhou</div>
+		      <div class="description">
+		        Cofounder of DoodleTV
+		      </div>
+		    </div>
+		    <div class="ui bottom attached button">
+		      <i class="add icon"></i>
+		      Add Friend
+		    </div>
+		  </div>
+		  <div class="card">
+		    <div class="content">
+		      <div class="header">Tongyun Wu</div>
+		      <div class="description">
+		         Cofounder of DoodleTV
+		      </div>
+		    </div>
+		    <div class="ui bottom attached button">
+		      <i class="add icon"></i>
+		      Add Friend
+		    </div>
+		  </div>
+		  <div class="card">
+		    <div class="content">
+		      <div class="header">Zhi Zheng</div>
+		      <div class="description">
+		         Cofounder of DoodleTV
+		      </div>
+		    </div>
+		    <div class="ui bottom attached button">
+		      <i class="add icon"></i>
+		      Add Friend
+		    </div>
+		  </div>
+		  <div class="card">
+		    <div class="content">
+		      <div class="header">Guanlin Zhou</div>
+		      <div class="description">
+		         Cofounder of DoodleTV
+		      </div>
+		    </div>
+		    <div class="ui bottom attached button">
+		      <i class="add icon"></i>
+		      Add Friend
+		    </div>
+		  </div>
+		</div>
+
+		<div class="ui cards">
+		  <div class="card">
+		    <div class="content">
+		      <div class="header">Emily commented on Doctor Who Series 9 Episode 1</div>
+		      <div class="description">
+				<p> <span id="comment-value-emily"></span></p>
+		      </div>	 
+			</div>
+		  </div>
+
+			<div class="card">
+			  <div class="content">
+			    <div class="header">Ivy Chen commented on Doctor Who Series 9 Episode 1</div>
+			    <div class="description">			
+			      <p><span id="comment-value-ivy"></span></p>
+			    </div>
+	    				 
+			  </div>
+			</div>
+		</div>
+
+	    <div class="container" ng-app="getEpisodeRecommendationApp" ng-controller="HttpController">
+	      <div class="row">
+	        <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-3 col-md-offset-5 col-md-2 pagination-centered text-center">
+	          <h3>Recommend</h3>
+	          <input id="btn-show-episode" type="button" class="btn btn-primary" value='Episode' ng-click="getEpisodes()">
+			  <input id="btn-show-friend" type="button" class="btn btn-primary" value='Friend'>
+	        </div>
+	      </div>
+	      <div class="row">
+	        <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-3 col-md-offset-5 col-md-2">
+	          <p>You may also like: <span id="episode-value"></span></p>
+	        </div>
+	      </div>
+		  <div class="ui bottom attached negative message" style="display: none">
+			<i class="icon remove"></i>
+			<span id="error-msg"></span>
+		  </div>
+		  <div class="ui bottom attached success message" style="display: none">
+			<i class="icon hand peace"></i>Customer successfully created! Please <a href="login.html">log in</a>.
+		  </div>
+	    </div>
 	  </div>
 
-	  
+	
+	<script>
+		var emailAddr = "";
 
-		<script>
-		$(document).ready(function(){
-		});
-		</script>
+		window.fbAsyncInit = function() {
+			FB.init({
+				appId      : '1234932106576628',
+				xfbml      : true,
+				version    : 'v2.8'
+			});
+			FB.AppEvents.logPageView();
+		};
+
+		(function(d, s, id){
+			var js, fjs = d.getElementsByTagName(s)[0];
+			if (d.getElementById(id)) {return;}
+			js = d.createElement(s); js.id = id;
+			js.src = "//connect.facebook.net/en_US/sdk.js";
+			fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));
+
+		function fblogin() {
+			FB.login(function(response){
+				if (response.status === 'connected') {
+					// Logged into your app and Facebook.
+					getInfo();
+				} else if (response.status === 'not_authorized') {
+					// The person is logged into Facebook, but not your app.
+				} else {
+					// The person is not logged into Facebook, so we're not sure if
+					// they are logged into this app or not.
+				}
+			}, { scope: 'email' });
+		};
+
+		function getInfo() {
+			FB.api('/me', 'GET', {fields: 'first_name, last_name, email'}, function(response) {
+				emailAddr = response.email;
+				$(".login").hide();
+				$(".welcome").html("Welcome to DoodleTV, " + response.first_name + " " + response.last_name);
+			});
+		}
+
+        $('#btn-show-friend').on('click', function() {
+            $.ajax({
+				type : "POST",
+    			crossDomain: true,
+                url : "http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit",
+				accepts : { json: "application/json" },
+				dataType : "json",
+				contentType : "application/json",
+				data: JSON.stringify({ "statements" :[{"statement":"MATCH  (me:user)-[:FRIEND]-(myFriend:user)-[:FRIEND]-(friendOfFriend:user) \nMATCH (me:user) -[:LIKE] -> (episode:content)\nMATCH (friendOfFriend) - [:LIKE] -> (episode)\nWITH friendOfFriend, count(episode) as nOfCommonLikes, collect(episode) as episodes, me\nWHERE NOT (me)-[:FRIEND]-(friendOfFriend:Person) AND me.email = 'huaye1994@gmail.com' AND nOfCommonLikes >= 1\nRETURN friendOfFriend as suggestedFriend;", "params": {} }]}) ,
+  				success: function(response) {
+					console.log(response.results[0].data);
+					//$("#episode-value").text(JSON.stringify(response.results[0].data[3]));
+					var episodes = "";
+					for (var index in response.results[0].data){
+						   episodes += response.results[0].data[index].row[0].name + " | "
+					};
+					$("#episode-value").text(episodes);	
+                }
+            });
+        });
+
+        $.ajax({
+  			url: "https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/comment/1",
+  			success: function(json) {
+    			$("#comment-value-emily").text(json.comment);
+			}
+    	});
+
+        $.ajax({
+      		url: "https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/comment/2",
+      		success: function(json) {
+        		$("#comment-value-ivy").text(json.comment);				 
+      		}
+    	});
+	</script>
+
+   </script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	</body>
 </html>
