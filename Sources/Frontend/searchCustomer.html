@@ -16,7 +16,8 @@
       <div class="ui secondary pointing menu">
       	<div class="header item">DoodleTV</div>
 		  <div class="right menu">
-			  <a class="active item" href="#">Home</a>
+			  <a class="item" href="index.html">Home</a>
+			  <a class="active item" href="searchCustomer.html">Search customer</a>
 		  </div>
 	  </div>
 
@@ -73,32 +74,32 @@
 							<div class="field">
 								<label>Name</label>
 								<div class="two fields">
-									<div class="field"><input type="text" name="firstname" value="{{firstname}}"></div>
-									<div class="field"><input type="text" name="lastname" value="{{lastname}}"></div>
+									<div class="field"><input type="text" id="firstname" value="{{firstname}}"></div>
+									<div class="field"><input type="text" id="lastname"value="{{lastname}}"></div>
 								</div>
 								<div class="two fields">
 									<div class="field">
 										<input type="text" name="email" value="{{email}}" disabled>
 									</div>
-									<div class="field"><input type="text" name="phonenumber" value="{{phonenumber}}"></div>
+									<div class="field"><input type="text" id="phonenumber" value="{{phonenumber}}"></div>
 								</div>
 							</div>
 							<div class="field">
 								<label>Address</label>
 								<div class="fields">
 									<div class="sixteen wide field">
-										<input type="text" name="street" ng-model="street" value="{{street}}">
+										<input type="text" id="street" ng-model="street" value="{{street}}">
 									</div>
 								</div>
 								<div class="three fields">
 									<div class="field">
-										<input type="text" name="apt" ng-model="apt" value="{{apt}}">
+										<input type="text" id="apt" ng-model="apt" value="{{apt}}">
 									</div>
 									<div class="field">
-										<input type="text" name="city" ng-model="city" value="{{city}}">
+										<input type="text" id="city" ng-model="city" value="{{city}}">
 									</div>
 									<div class="field">
-										<input type="text" name="zipcode" ng-model="zipcode" value="{{zipcode}}"/>
+										<input type="text" id="zipcode" ng-model="zipcode" value="{{zipcode}}"/>
 									</div>
 								</div>
 							</div>
@@ -171,20 +172,19 @@
                 	$("input[name='apt']").val(), 
                 	$("input[name='city']").val(), 
                 	$("input[name='zipcode']").val())) return;*/
-                if(!checkPhonenumber($("input[name='phonenumber']").val())) return;
+                //if(!checkPhonenumber($("input[name='phonenumber']").val())) return;
 
                 var custdata = {
-                    email : $scope.email,
-                    firstname : $scope.firstName,
-                    lastname : $scope.lastName,
-                    phonenumber : $scope.phonenumber
+                    firstname : document.getElementById('firstname').value,
+                    lastname : document.getElementById('lastname').value,
+                    phonenumber : document.getElementById('phonenumber').value
                 };
 
                 var addrdata = {
-                    street : $scope.street,
-                    apt : $scope.apt,
-                    city : $scope.city,
-                    zipcode : $scope.zipcode
+                    street : document.getElementById('street').value,
+                    apt : document.getElementById('apt').value,
+                    city : document.getElementById('city').value,
+                    zipcode : document.getElementById('zipcode').value
                 };
 
                 var config = {
@@ -195,7 +195,7 @@
                     }
                 }
 
-                $http.put('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/customers/', custdata, config)
+                $http.put('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/customers/' + $('input[name="email"]').val(), custdata, config)
                 .success(function (data, status, headers, config) {
                     $(".negative.message").hide();
 					$(".success.message").show();
