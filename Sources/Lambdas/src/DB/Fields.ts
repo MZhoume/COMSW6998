@@ -1,4 +1,4 @@
-const customersFields = ['email', 'password', 'firstname', 'lastname', 'phonenumber', 'delivery_point_barcode'];
+const customersFields = ['email', 'firstname', 'lastname', 'phonenumber', 'delivery_point_barcode'];
 const addressesFields = ['delivery_point_barcode', 'city', 'street', 'num', 'zipcode'];
 
 // contentInstance is the type from ContentInstances
