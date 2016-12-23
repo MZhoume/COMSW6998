@@ -37,7 +37,9 @@ async function invoke(event: any): Promise<any> {
 
             switch (tableName) {
                 case 'addresses':
-                    return dbManager.create(tableName, await requestValidAddr(event.payload));
+                    let addr = await requestValidAddr(event.payload);
+                    await dbManager.create(tableName, addr);
+                    return addr;
                 case 'customers':
                     await queryCypher('CREATE (n:user { name: {name}, email: {email} })',
                         {
