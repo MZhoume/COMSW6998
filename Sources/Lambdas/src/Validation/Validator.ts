@@ -11,6 +11,12 @@ var Validator = {
         // Validate if the zipcode contains exactly 5 digits
         const regex = /^\d{5}$/;
         return regex.test(zipcode);
+    },
+
+    phonenumber: (number: string): boolean => {
+        // validate if the phone number contains only 10 digits
+        const regex = /^\d{10}$/;
+        return regex.test(number);
     }
 };
 
