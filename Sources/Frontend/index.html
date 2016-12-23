@@ -18,7 +18,6 @@
 		  <div class="right menu">
 			  <a class="active item" href="#">Home</a>
 			  <a class="item" href="searchCustomer.html">Search customer</a>
-			  <a class="item" href="createCustomer.html">Create customer</a>
 		  </div>
 	  </div>
 
@@ -70,34 +69,12 @@
 			</div>
 		</div>
 
-		<h4 style="margin-top:50px;">Recommended friends</h4>
-		<div class="ui cards friends" style="margin-top: 50px"></div>
+		<h4 class="friendstitle" style="margin-top:50px;"></h4>
+		<div class="ui cards friends"></div>
 
-		<h4 style="margin-top:50px;">Recommended episodes</h4>
-		<div class="ui cards episodes" style="margin-top: 50px"></div>
+		<h4 class="episodestitle" style="margin-top:50px;"></h4>
+		<div class="ui cards episodes"></div>
 
-
-	    <div class="container" ng-app="getEpisodeRecommendationApp" ng-controller="HttpController">
-	      <div class="row">
-	        <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-3 col-md-offset-5 col-md-2 pagination-centered text-center">
-	          <h3>Recommend</h3>
-	          <input id="btn-show-episode" type="button" class="btn btn-primary" value='Episode' ng-click="getEpisodes()">
-			  <input id="btn-show-friend" type="button" class="btn btn-primary" value='Friend'>
-	        </div>
-	      </div>
-	      <div class="row">
-	        <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-3 col-md-offset-5 col-md-2">
-	          <p>You may also like: <span id="episode-value"></span></p>
-	        </div>
-	      </div>
-		  <div class="ui bottom attached negative message" style="display: none">
-			<i class="icon remove"></i>
-			<span id="error-msg"></span>
-		  </div>
-		  <div class="ui bottom attached success message" style="display: none">
-			<i class="icon hand peace"></i>Customer successfully created! Please <a href="login.html">log in</a>.
-		  </div>
-	    </div>
 	  </div>
 
 	
@@ -144,19 +121,19 @@
 				$.get({
 		      		url: "https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/recommendation?email=" + emailAddr + "&method=friend",
 		      		success: function(json) {
+		      			$(".friendstitle").html("Recommended friends");
 		        		$.each(json, function() {
 		        			$(".friends").append('<div class="card"><div class="content"><div class="header">' + this.name + '</div><div class="description">' + this.email + '</div></div></div>');
-		        			console.log();
 		        		});
 		      		}
 		    	});
 
 		    	$.get({
-		      		url: "https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/recommendation?email=huaye1994@gmail.com&method=episode"",
+		      		url: "https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/recommendation?email=" + emailAddr + "&method=episode",
 		      		success: function(json) {
+		      			$(".episodestitle").html("Recommended episodes");
 		        		$.each(json, function() {
-		        			$(".friends").append('<div class="card"><div class="content"><div class="header">' + this.name + '</div><div class="description">' + this.email + '</div></div></div>');
-		        			console.log();
+		        			$(".episodes").append('<div class="card"><div class="content"><div class="description">' + this.name + '</div></div></div>');
 		        		});
 		      		}
 		    	});
