@@ -15,6 +15,7 @@ const AddressValidation_1 = require("./Validation/AddressValidation");
 const Helpers_1 = require("./Helpers/Helpers");
 const Fields_1 = require("./DB/Fields");
 const Neo4j_1 = require("./Helpers/Neo4j");
+const Statics_1 = require("./Statics");
 function invoke(event) {
     return __awaiter(this, void 0, void 0, function* () {
         let tableName = event.tableName;
@@ -22,8 +23,11 @@ function invoke(event) {
         let dbManager = new DynamoDBManager_1.DynamoDBManager();
         let sns = new AWS.SNS();
         sns.publish({
-            Message: `${operation} on table ${tableName} -- Team Typer`,
-            TopicArn: 'arn:aws:sns:us-east-1:722850008576:comsTopic'
+            Message: `This just in: ${operation} on table ${tableName} -- Team Typer`,
+            TopicArn: Statics_1.snsArn
+        }, (err, data) => {
+            if (err)
+                throw err;
         });
         switch (operation) {
             case 'create':
@@ -47,18 +51,18 @@ function invoke(event) {
                             throw 'Comment does not exist in request.';
                         }
                         event.payload['UUID'] = sha1(comment);
-                        if (event.payload['contentInstance'] === 'episode') {
+                        if (Helpers_1.tryFind(event.payload, 'contentInstance', undefined) === 'episode') {
                             yield Neo4j_1.queryCypher('CREATE (c:comment { id: {id}, comment: {comment} })', {
                                 id: event.payload['UUID'],
                                 comment: comment
                             });
                             yield Neo4j_1.queryCypher('MATCH (a:user),( b:comment) WHERE a.email = {email} AND b.id = {uuid} CREATE (a)-[r:COMMENTED]->(b)', {
-                                email: event.payload['userID'],
+                                email: Helpers_1.tryFind(event.payload, 'userID', undefined),
                                 uuid: event.payload['UUID']
                             });
                             yield Neo4j_1.queryCypher('MATCH (a:comment),( b:content) WHERE a.id = {cuuid} AND b.id = {iuuid} CREATE (a)-[r:commentedUpon]->(b)', {
                                 cuuid: event.payload['UUID'],
-                                iuuid: event.payload['contentInstanceID']
+                                iuuid: Helpers_1.tryFind(event.payload, 'contentInstanceID', undefined)
                             });
                         }
                         return dbManager.create(tableName, event.payload);

@@ -20,8 +20,14 @@ export class DynamoDBManager implements IDBManager {
         if (r && r.Item) throw `${v || 'Item'} already exists.`;
 
         let item = {};
-        for (let e of getFields(tableName))
-            item[e] = tryFind(payload, e, undefined);
+        for (let e of getFields(tableName)) {
+            let p = tryFind(payload, e, undefined);
+            if (p) {
+                item[e] = p;
+            } else {
+                throw `${e} does not exist in request.`;
+            }
+        }
 
         return this._db.create({
             TableName: tableName,

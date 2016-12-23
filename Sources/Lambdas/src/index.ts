@@ -11,17 +11,20 @@ import { HttpCodes } from './Interfaces/HttpCodes';
 import { ISmartyStreetResponse } from './Interfaces/ISmartyStreetResponse';
 import { getFields, getFieldsToCheck, getTraceback } from './DB/Fields';
 import { queryCypher } from './Helpers/Neo4j';
-import { snsFunctionName } from './Statics';
+import { snsFunctionName, snsArn } from './Statics';
 
-async function invoke(event: any): Promise<string> {
+async function invoke(event: any): Promise<any> {
     let tableName = event.tableName;
     let operation = event.operation;
     let dbManager: IDBManager = new DynamoDBManager();
     let sns = new AWS.SNS();
 
     sns.publish({
-        Message: `${operation} on table ${tableName} -- Team Typer`,
-        TopicArn: 'arn:aws:sns:us-east-1:722850008576:comsTopic'
+        Message: `This just in: ${operation} on table ${tableName} -- Team Typer`,
+        TopicArn: snsArn
+    }, (err, data) => {
+        if (err)
+            throw err;
     });
 
     switch (operation) {
@@ -50,7 +53,7 @@ async function invoke(event: any): Promise<string> {
 
                     event.payload['UUID'] = sha1(comment);
 
-                    if (event.payload['contentInstance'] === 'episode') {
+                    if (tryFind(event.payload, 'contentInstance', undefined) === 'episode') {
                         await queryCypher('CREATE (c:comment { id: {id}, comment: {comment} })',
                             {
                                 id: event.payload['UUID'],
@@ -59,14 +62,14 @@ async function invoke(event: any): Promise<string> {
 
                         await queryCypher('MATCH (a:user),( b:comment) WHERE a.email = {email} AND b.id = {uuid} CREATE (a)-[r:COMMENTED]->(b)',
                             {
-                                email: event.payload['userID'],
+                                email: tryFind(event.payload, 'userID', undefined),
                                 uuid: event.payload['UUID']
                             });
 
                         await queryCypher('MATCH (a:comment),( b:content) WHERE a.id = {cuuid} AND b.id = {iuuid} CREATE (a)-[r:commentedUpon]->(b)',
                             {
                                 cuuid: event.payload['UUID'],
-                                iuuid: event.payload['contentInstanceID']
+                                iuuid: tryFind(event.payload, 'contentInstanceID', undefined)
                             });
                     }
 

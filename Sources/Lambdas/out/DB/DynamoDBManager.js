@@ -29,8 +29,15 @@ class DynamoDBManager {
             if (r && r.Item)
                 throw `${v || 'Item'} already exists.`;
             let item = {};
-            for (let e of Fields_1.getFields(tableName))
-                item[e] = Helpers_1.tryFind(payload, e, undefined);
+            for (let e of Fields_1.getFields(tableName)) {
+                let p = Helpers_1.tryFind(payload, e, undefined);
+                if (p) {
+                    item[e] = p;
+                }
+                else {
+                    throw `${e} does not exist in request.`;
+                }
+            }
             return this._db.create({
                 TableName: tableName,
                 Item: item
