@@ -74,7 +74,7 @@
                     <span id="error-msg"></span>
                 </div>
                 <div class="ui bottom attached success message" style="display: none">
-                    <i class="icon hand peace"></i>Customer successfully created! Please <a href="login.html">log in</a>.
+                    <i class="icon hand peace"></i>Successfully created! Please <a href="login.html">log in</a>.
                 </div>
             </div>
               
@@ -94,16 +94,11 @@
                 if(!checkPhonenumber($scope.phonenumber)) return;
                 // todo check address
 
-                var custdata = {
-                    email : $scope.email,
-                    firstname : $scope.firstname,
-                    lastname : $scope.lastname,
-                    phonenumber : $scope.phonenumber
-                };
+
 
                 var addrdata = {
-                    street : $scope.street,
-                    apt : $scope.apt,
+                    street : $scope.num + " " + $scope.street,
+                    num : $scope.apt,
                     city : $scope.city,
                     zipcode : $scope.zipcode
                 };
@@ -115,11 +110,29 @@
                         'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Origin'
                     }
                 }
-
-                $http.post('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/customers', custdata, config)
+                console.log(addrdata)
+                $http.post('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/addresses', addrdata, config)
                 .success(function (data, status, headers, config) {
                     $(".negative.message").hide();
                     $(".success.message").show();
+                    var custdata = {
+                        email : $scope.email,
+                        firstname : $scope.firstname,
+                        lastname : $scope.lastname,
+                        phonenumber : $scope.phonenumber,
+                        delivery_point_barcode : data.delivery_point_barcode
+                    };
+                    $http.post('https://br1l3wine3.execute-api.us-east-1.amazonaws.com/swaggerv3/demo/customers', custdata, config)
+                    .success(function (data, status, headers, config) {
+                        $(".negative.message").hide();
+                        $(".success.message").show();
+                    }).error(function (data, status, header, config) {
+                            $(".success.message").hide();
+                            $("#error-msg").html('Failed to create new customer because ' + data["error message"]);
+                            $(".negative.message").show();
+                    })
+
+
                 })
                 .error(function (data, status, header, config) {
                     $(".success.message").hide();
