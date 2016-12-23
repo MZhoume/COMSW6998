@@ -57,7 +57,7 @@
                         </div>
                         <div class="three fields">
                             <div class="field">
-                                <input type="text" name="apt" ng-model="apt" placeholder="Apt No.">
+                                <input type="text" id="apt" ng-model="apt" placeholder="Apt No.">
                             </div>
                             <div class="field">
                                 <input type="text" id="locality" ng-model="city" placeholder="City">
@@ -84,23 +84,19 @@
     <div class="ui text menu"><div class="item copyright">Copyright &copy; 2016 Typer. All rights reserved.</div></div>
 
     <script>
-    var app = angular.module("createCustomerApp", []);
+        var app = angular.module("createCustomerApp", []);
         app.controller("HttpController", function ($scope, $http) {
 
             $scope.saveCustomer = function () {
-                if(!checkNull($scope.firstname, $scope.lastname, $scope.email, $scope.phonenumber, 
-                              $scope.num, $scope.street, $scope.apt, $scope.city, $scope.zipcode))
+                if(!checkNull($scope.firstname, $scope.lastname, $scope.email, $scope.phonenumber, $scope.num, $scope.street, $scope.apt, $scope.city, $scope.zipcode))
                     return;
                 if(!checkPhonenumber($scope.phonenumber)) return;
-                // todo check address
-
-
 
                 var addrdata = {
-                    street : $scope.num + " " + $scope.street,
-                    num : $scope.apt,
-                    city : $scope.city,
-                    zipcode : $scope.zipcode
+                    street : document.getElementById("street_number").value + " " + document.getElementById("route").value,
+                    num : document.getElementById("apt").value,
+                    city : document.getElementById("locality").value,
+                    zipcode : document.getElementById("postal_code").value
                 };
 
                 var config = {
@@ -169,23 +165,6 @@
                 $(".negative.message").show();
                 return false;
             }
-        };
-
-        // todo save address
-        function checkAddress(address) {
-            //var addrUrl = "https://oqw8vpic39.execute-api.us-east-1.amazonaws.com/v1/demo/customers";
-            //var addressVal = numVal + streetVal + cityVal + stateVal + zipcodeVal + countryVall;
-            //if(!checkAddress(aVal)) return;
-
-            /*
-            {
-                "operation": "create",
-                "tableName": "customers",
-                "payload": {
-                    "item": {"fistname":"emily","lastname":"hua","phonenumber":"3472782514","email":"huaye1992@gmail.com"}
-                }
-            }
-            */
         };
     </script>
 
