@@ -184,36 +184,34 @@
     });
 	</script>
 
-	<script>
-    var app = angular.module("getEpisodeRecommendationApp", []);
-        app.controller("HttpController", function ($scope, $http) {
-
-            $scope.getEpisodes = function () {
-
-
-                var config = {
-                    headers : {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin' : '*',
-                        'Access-Control-Allow-Headers' : 'Content-Type, Access-Control-Allow-Origin'
-                    }
-                }
-                var data = JSON.stringify({ "statements" :[{"statement":"MATCH (me:user {email:'huaye1994@gmail.com'})-[myrating:RATE]->(myratedepisode:content)\nMATCH (other:user)-[theirrating:RATE]->(myratedepisode)\nWHERE me <> other\nAND abs(myrating.score - theirrating.score) < 2\nWITH other, myratedepisode\nMATCH (other)-[otherrating:RATE]->(episode:content)\nWHERE myratedepisode <> episode\nWITH avg(otherrating.score) AS avgRating, episode\nRETURN episode\nORDER BY avgRating desc\nLIMIT 3", "params": {} }]}) 
-                $http.post("http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit", data, config)
-                .success(function (data, status, headers, config) {
-                    $(".negative.message").hide();
-                    $(".success.message").show();
-                })
-                .error(function (data, status, header, config) {
-                    $(".negative.message").html('Failed to create new customer because ' + data["error message"]);
-                    $(".negative.message").show();
-					$(".success.message").hide();
-                });
-
-                // todo save address
-            };
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#btn-show-episode').on('click', function() {
+            $.ajax({
+							type : "POST",
+              url : "http://contentcatalog:mL1CSF2PKYTtPkGMdRnv@hobby-hhimaappojekgbkebdhlnhol.dbs.graphenedb.com:24789/db/data/transaction/commit",
+							accepts : { json: "application/json" },
+							crossDomain:true,
+							dataType : "json",
+							contentType : "application/json",
+							header: 'Access-Control-Allow-Origin: *',
+							data: JSON.stringify({ "statements" :[{"statement":"MATCH (me:user {email:'huaye1994@gmail.com'})-[myrating:RATE]->(myratedepisode:content)\nMATCH (other:user)-[theirrating:RATE]->(myratedepisode)\nWHERE me <> other\nAND abs(myrating.score - theirrating.score) < 2\nWITH other, myratedepisode\nMATCH (other)-[otherrating:RATE]->(episode:content)\nWHERE myratedepisode <> episode\nWITH avg(otherrating.score) AS avgRating, episode\nRETURN episode\nORDER BY avgRating desc\nLIMIT 3", "params": {} }]}) ,
+              success: function(response) {
+								console.log(response.results[0].data);
+								//$("#episode-value").text(JSON.stringify(response.results[0].data[3]));
+								var episodes = "";
+								for (var index in response.results[0].data){
+									   episodes += response.results[0].data[index].row[0].name + " | "
+								};
+								$("#episode-value").text(episodes);
+							
+              }
+            });
         });
-   </script>
+      });
+    </script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script>
