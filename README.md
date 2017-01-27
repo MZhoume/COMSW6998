@@ -24,6 +24,7 @@ FIRST: set up your ssh keys with [GitHub](https://help.github.com/articles/gener
     - REST Client (in VSCode)
     - HttpRequester (in Sublime)
     - RESTAngular (in code)
+- [Webpack(module bundler)](https://webpack.github.io)
 
 ### Coding Guideline
 - [TypeScript](https://github.com/Microsoft/TypeScript/wiki/Coding-guidelines)
