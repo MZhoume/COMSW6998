@@ -25,6 +25,10 @@ FIRST: set up your ssh keys with [GitHub](https://help.github.com/articles/gener
     - HttpRequester (in Sublime)
     - RESTAngular (in code)
 - [Webpack(module bundler)](https://webpack.github.io)
+- [Travis CI(continuous integration)](https://travis-ci.org)
+- [Git Guide](https://guides.github.com)
+  - Branch
+  - Issues
 
 ### Coding Guideline
 - [TypeScript](https://github.com/Microsoft/TypeScript/wiki/Coding-guidelines)
